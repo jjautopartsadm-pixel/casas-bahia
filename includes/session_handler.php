@@ -1,7 +1,7 @@
 <?php
 /**
  * includes/session_handler.php
- * Gerenciador de Sessões compatível com Vercel Serverless (Armazenamento em MySQL com Fallback)
+ * Gerenciador de Sessões compatível com Vercel Serverless (Suporta MySQL e Supabase/PostgreSQL)
  */
 
 function startSecureSession() {
@@ -9,7 +9,6 @@ function startSecureSession() {
         return;
     }
 
-    // Configurações recomendadas de cookie de sessão
     $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
                (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
@@ -19,12 +18,14 @@ function startSecureSession() {
         @ini_set('session.cookie_secure', '1');
     }
 
-    // Tentar inicializar o handler de banco de dados se houver conexão MySQL
     if (function_exists('getDBConnection')) {
         try {
             $db = getDBConnection();
-            if ($db && $db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') {
-                registerMySQLSessionHandler($db);
+            if ($db) {
+                $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
+                if ($driver === 'mysql' || $driver === 'pgsql') {
+                    registerDBSessionHandler($db, $driver);
+                }
             }
         } catch (Exception $e) {
             // Em caso de falha, segue com o session_start nativo
@@ -34,22 +35,35 @@ function startSecureSession() {
     @session_start();
 }
 
-function registerMySQLSessionHandler($db) {
+function registerDBSessionHandler($db, $driver = 'mysql') {
     try {
-        $db->exec("
-            CREATE TABLE IF NOT EXISTS `php_sessions` (
-                `id` VARCHAR(128) NOT NULL PRIMARY KEY,
-                `data` MEDIUMTEXT NOT NULL,
-                `last_activity` INT UNSIGNED NOT NULL,
-                INDEX (`last_activity`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-        ");
+        if ($driver === 'pgsql') {
+            $db->exec("
+                CREATE TABLE IF NOT EXISTS php_sessions (
+                    id VARCHAR(128) NOT NULL PRIMARY KEY,
+                    data TEXT NOT NULL,
+                    last_activity INT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_php_sessions_activity ON php_sessions (last_activity);
+            ");
+        } else {
+            $db->exec("
+                CREATE TABLE IF NOT EXISTS `php_sessions` (
+                    `id` VARCHAR(128) NOT NULL PRIMARY KEY,
+                    `data` MEDIUMTEXT NOT NULL,
+                    `last_activity` INT UNSIGNED NOT NULL,
+                    INDEX (`last_activity`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            ");
+        }
 
-        $handler = new class($db) implements SessionHandlerInterface {
+        $handler = new class($db, $driver) implements SessionHandlerInterface {
             private $pdo;
+            private $driver;
 
-            public function __construct($pdo) {
+            public function __construct($pdo, $driver) {
                 $this->pdo = $pdo;
+                $this->driver = $driver;
             }
 
             public function open(string $path, string $name): bool {
@@ -74,10 +88,18 @@ function registerMySQLSessionHandler($db) {
 
             public function write(string $id, string $data): bool {
                 try {
-                    $stmt = $this->pdo->prepare("
-                        REPLACE INTO php_sessions (id, data, last_activity) 
-                        VALUES (:id, :data, :last_activity)
-                    ");
+                    if ($this->driver === 'pgsql') {
+                        $stmt = $this->pdo->prepare("
+                            INSERT INTO php_sessions (id, data, last_activity) 
+                            VALUES (:id, :data, :last_activity)
+                            ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, last_activity = EXCLUDED.last_activity
+                        ");
+                    } else {
+                        $stmt = $this->pdo->prepare("
+                            REPLACE INTO php_sessions (id, data, last_activity) 
+                            VALUES (:id, :data, :last_activity)
+                        ");
+                    }
                     return $stmt->execute([
                         'id' => $id,
                         'data' => $data,

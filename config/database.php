@@ -6,31 +6,40 @@
 // FORÇAR FUSO HORÁRIO OFICIAL DE BRASÍLIA BRASIL (UTC-3)
 date_default_timezone_set('America/Sao_Paulo');
 
-// Credenciais da Hostinger Pré-Configuradas
+// Credenciais do Banco de Dados (Suporta MySQL e Supabase / PostgreSQL)
 define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
 define('DB_NAME', getenv('DB_NAME') ?: 'test');
 define('DB_USER', getenv('DB_USER') ?: 'root');
 define('DB_PASS', getenv('DB_PASS') ?: 'root');
 define('DB_PORT', getenv('DB_PORT') ?: '3306');
+define('DB_DRIVER', getenv('DB_DRIVER') ?: ((DB_PORT == '5432' || DB_PORT == '6543' || strpos(DB_HOST, 'supabase') !== false || strpos(DB_HOST, 'neon') !== false || strpos(DB_HOST, 'postgres') !== false) ? 'pgsql' : 'mysql'));
 
 function getDBConnection() {
     static $pdo = null;
     
     if ($pdo === null) {
         try {
-            $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=utf8mb4";
             $options = [
                 PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES   => true,
             ];
-            // Suporte a SSL para bancos MySQL em nuvem (ex: TiDB Cloud, Aiven, PlanetScale, AWS RDS)
-            if (getenv('DB_SSL') === 'true' || getenv('DB_SSL') === '1' || getenv('MYSQL_ATTR_SSL_CA')) {
-                $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+
+            if (DB_DRIVER === 'pgsql') {
+                $dsn = "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";sslmode=require";
+                $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+                try { $pdo->exec("SET TIME ZONE 'America/Sao_Paulo'"); } catch (Exception $eTz) {}
+                ensureExtraTablesExist($pdo, 'pgsql');
+            } else {
+                $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+                // Suporte a SSL para bancos MySQL em nuvem (ex: TiDB Cloud, Aiven, PlanetScale, AWS RDS)
+                if (getenv('DB_SSL') === 'true' || getenv('DB_SSL') === '1' || getenv('MYSQL_ATTR_SSL_CA')) {
+                    $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+                }
+                $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+                try { $pdo->exec("SET time_zone = '-03:00'"); } catch (Exception $eTz) {}
+                ensureExtraTablesExist($pdo, 'mysql');
             }
-            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-            try { $pdo->exec("SET time_zone = '-03:00'"); } catch (Exception $eTz) {}
-            ensureExtraTablesExist($pdo, 'mysql');
         } catch (PDOException $e) {
             // Em ambiente local sem MySQL ativo, usa fallback SQLite para testes
             $sqlitePath = __DIR__ . '/../database.sqlite';
@@ -50,7 +59,13 @@ function getDBConnection() {
 
 function ensureExtraTablesExist($pdo, $driver = 'mysql') {
     try {
-        $pkType = ($driver === 'sqlite') ? 'INTEGER PRIMARY KEY AUTOINCREMENT' : 'INT AUTO_INCREMENT PRIMARY KEY';
+        if ($driver === 'pgsql') {
+            $pkType = 'SERIAL PRIMARY KEY';
+        } elseif ($driver === 'sqlite') {
+            $pkType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
+        } else {
+            $pkType = 'INT AUTO_INCREMENT PRIMARY KEY';
+        }
 
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS products (
