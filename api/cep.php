@@ -1,0 +1,21 @@
+<?php
+header('Content-Type: application/json; charset=utf-8');
+
+$cep = preg_replace('/[^0-9]/', '', $_GET['cep'] ?? '');
+
+if (strlen($cep) !== 8) {
+    http_response_code(400);
+    echo json_encode(['error' => 'CEP inválido']);
+    exit;
+}
+
+$url = "https://viacep.com.br/ws/{$cep}/json/";
+$response = @file_get_contents($url);
+
+if ($response === FALSE) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Falha ao consultar serviço de frete']);
+    exit;
+}
+
+echo $response;

@@ -1,0 +1,10 @@
+.git
+.gitignore
+*.sql
+*.sqlite
+*.log
+scratch/
+docs/
+.user.ini
+gateway_debug.log
+config/visit_reset.time
