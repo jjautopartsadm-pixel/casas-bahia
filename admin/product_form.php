@@ -218,7 +218,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'reviews_count' => $reviews_count, 'questions_count' => $questions_count,
                     'vname' => $variation_name, 'vopts' => $variation_options, 'vdef' => $variation_default
                 ]);
-                $productId = $db->lastInsertId();
+                $driver = strtolower($db->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
+                $productId = null;
+                if ($driver === 'pgsql') {
+                    try { $productId = $db->lastInsertId('products_id_seq'); } catch (Exception $eSeq) {}
+                    if (!$productId) {
+                        try { $productId = $db->query("SELECT currval(pg_get_serial_sequence('products', 'id'))")->fetchColumn(); } catch (Exception $eSeq2) {}
+                    }
+                } else {
+                    $productId = $db->lastInsertId();
+                }
+                if (!$productId) {
+                    $productId = $db->query("SELECT MAX(id) FROM products")->fetchColumn();
+                }
             }
 
             // 1. Processar upload de fotos enviadas do computador

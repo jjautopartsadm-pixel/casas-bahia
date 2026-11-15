@@ -5,9 +5,10 @@ require_once __DIR__ . '/auth.php';
 requireLogin();
 
 $db = getDBConnection();
+$driver = strtolower($db->getAttribute(PDO::ATTR_DRIVER_NAME) ?? 'mysql');
 
-// Garantir colunas e tabelas MySQL de forma segura
-ensureExtraTablesExist($db, 'mysql');
+// Garantir colunas e tabelas de forma segura
+ensureExtraTablesExist($db, $driver);
 
 $successMsg = '';
 $errorMsg = '';
@@ -595,7 +596,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'vdef' => $variationDefault
             ]);
 
-            $newProductId = $db->lastInsertId();
+            $newProductId = null;
+            if ($driver === 'pgsql') {
+                try { $newProductId = $db->lastInsertId('products_id_seq'); } catch (Exception $eSeq) {}
+                if (!$newProductId) {
+                    try { $newProductId = $db->query("SELECT currval(pg_get_serial_sequence('products', 'id'))")->fetchColumn(); } catch (Exception $eSeq2) {}
+                }
+            } else {
+                $newProductId = $db->lastInsertId();
+            }
+            if (!$newProductId) {
+                $newProductId = $db->query("SELECT MAX(id) FROM products")->fetchColumn();
+            }
             $importedProductId = $newProductId;
 
             // Inserir Imagens na Galeria
@@ -889,7 +901,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <!-- SE JÁ ANALISOU O CÓDIGO FONTE, EXIBE O FORMULÁRIO DE CONFIRMAÇÃO COM OS DADOS EXTRAÍDOS E GERADOR DE AVALIAÇÕES -->
       <?php if ($parsedData): ?>
-        <div class="preview-badge">✓ Dados Extraídos com Sucesso! Confira os detalhes e configure as avaliações abaixo:</div>
+        <div style="background: #e8f5e9; border: 2px solid #2e7d32; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; font-size: 15px; color: #1b5e20;">
+          <strong>✓ Passo 1 Concluído: Dados Extraídos com Sucesso!</strong><br>
+          <span style="font-size: 13px; color: #2e7d32;">⚠️ <strong>Atenção:</strong> O produto ainda <u>não está salvo</u> no catálogo. Revise os campos abaixo, role até o final da página e clique no botão verde <strong>"💾 Confirmar e Cadastrar Produto"</strong> para salvar.</span>
+        </div>
 
         <form method="POST">
           <input type="hidden" name="action" value="save">
