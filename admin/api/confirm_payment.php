@@ -2,12 +2,9 @@
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../auth.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-if (empty($_SESSION['admin_logged_in'])) {
+if (!isLoggedIn()) {
     echo json_encode(['success' => false, 'error' => 'Sessão do admin expirada. Faça login no painel novamente.']);
     exit;
 }

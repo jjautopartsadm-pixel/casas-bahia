@@ -44,10 +44,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 if ($passwordMatch) {
+                    $adminId = $user['id'];
+                    $adminUser = !empty($user['username']) ? $user['username'] : (!empty($user['email']) ? $user['email'] : $username);
+                    $adminName = !empty($user['name']) ? $user['name'] : 'Administrador';
+
                     $_SESSION['admin_logged_in'] = true;
-                    $_SESSION['admin_id'] = $user['id'];
-                    $_SESSION['admin_user'] = !empty($user['username']) ? $user['username'] : (!empty($user['email']) ? $user['email'] : $username);
-                    $_SESSION['admin_name'] = !empty($user['name']) ? $user['name'] : 'Administrador';
+                    $_SESSION['admin_id'] = $adminId;
+                    $_SESSION['admin_user'] = $adminUser;
+                    $_SESSION['admin_name'] = $adminName;
+
+                    // Cria o cookie de autenticação assinado criptograficamente (Serverless persistente)
+                    if (function_exists('setAdminAuthCookie')) {
+                        setAdminAuthCookie($adminId, $adminUser, $adminName);
+                    }
+
                     header('Location: index.php');
                     exit;
                 } else {
