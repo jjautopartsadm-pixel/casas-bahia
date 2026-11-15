@@ -144,7 +144,7 @@ function sendMetaCapiEvent($pixelId, $accessToken, $eventName, $eventData = [], 
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             $res = curl_exec($ch);
-            curl_close($ch);
+            @curl_close($ch);
             return $res;
         } else {
             $opts = [

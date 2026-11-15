@@ -4,6 +4,10 @@
  * Redireciona e executa com segurança as rotas PHP do projeto na Vercel.
  */
 
+// Silenciar warnings e avisos de versão (ex: Deprecated do PHP 8.4/8.5) para não quebrar o layout
+@ini_set('display_errors', '0');
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED & ~E_NOTICE & ~E_WARNING);
+
 // Diretório raiz do projeto
 $rootDir = realpath(__DIR__ . '/..');
 

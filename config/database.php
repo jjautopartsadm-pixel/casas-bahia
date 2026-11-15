@@ -59,6 +59,11 @@ function getDBConnection() {
                 $pdo = new PDO("sqlite:" . $sqlitePath);
                 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+                if (method_exists($pdo, 'sqliteCreateFunction')) {
+                    $pdo->sqliteCreateFunction('RAND', function() {
+                        return mt_rand() / mt_getrandmax();
+                    });
+                }
                 ensureExtraTablesExist($pdo, 'sqlite');
             } catch (Exception $ex) {
                 throw new Exception("Banco de dados não configurado na Vercel. Adicione as variáveis de ambiente (DB_HOST, DB_NAME, DB_USER, DB_PASS, DB_PORT) nas configurações do seu projeto na Vercel.");

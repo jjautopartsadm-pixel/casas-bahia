@@ -19,11 +19,13 @@ if (!empty($id)) {
 // Buscar produtos sugeridos ("Indicados com base nas suas visitas")
 $suggestedProducts = [];
 if ($db) {
+    $driver = strtolower($db->getAttribute(PDO::ATTR_DRIVER_NAME) ?? '');
+    $randSql = ($driver === 'sqlite' || $driver === 'pgsql') ? 'RANDOM()' : 'RAND()';
     if ($product) {
-        $stmtSugg = $db->prepare("SELECT * FROM products WHERE id != :id ORDER BY RAND() LIMIT 4");
+        $stmtSugg = $db->prepare("SELECT * FROM products WHERE id != :id ORDER BY {$randSql} LIMIT 4");
         $stmtSugg->execute(['id' => $product['id']]);
     } else {
-        $stmtSugg = $db->query("SELECT * FROM products ORDER BY id DESC LIMIT 4");
+        $stmtSugg = $db->query("SELECT * FROM products ORDER BY {$randSql} LIMIT 4");
     }
     $suggestedProducts = $stmtSugg->fetchAll();
 }

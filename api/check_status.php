@@ -125,7 +125,7 @@ try {
                     ]);
                     $res = curl_exec($ch);
                     $chCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                    curl_close($ch);
+                    @curl_close($ch);
 
                     if ($res && ($chCode === 200 || $chCode === 201)) {
                         $resJson = json_decode($res, true);
@@ -158,7 +158,7 @@ try {
                 CURLOPT_SSL_VERIFYHOST => false
             ]);
             $res = curl_exec($ch);
-            curl_close($ch);
+            @curl_close($ch);
 
             if ($res) {
                 $resJson = json_decode($res, true);
@@ -182,7 +182,7 @@ try {
                 CURLOPT_SSL_VERIFYHOST => false
             ]);
             $res = curl_exec($ch);
-            curl_close($ch);
+            @curl_close($ch);
 
             if ($res) {
                 $resJson = json_decode($res, true);
@@ -218,7 +218,7 @@ try {
                 ]);
                 $res = curl_exec($ch);
                 $chCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                curl_close($ch);
+                @curl_close($ch);
 
                 if ($res && ($chCode === 200 || $chCode === 201)) {
                     $resJson = json_decode($res, true);

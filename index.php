@@ -125,7 +125,7 @@ try {
         $warranties = $stmtWar->fetchAll();
 
         $dbDriver = strtolower($db->getAttribute(PDO::ATTR_DRIVER_NAME) ?? '');
-        $sqlRand  = ($dbDriver === 'sqlite') ? 'RANDOM()' : 'RAND()';
+        $sqlRand  = ($dbDriver === 'sqlite' || $dbDriver === 'pgsql') ? 'RANDOM()' : 'RAND()';
 
         // Buscar Produtos para as seções de recomendação (Itens que combinam + Acreditamos que pode gostar)
         $stmtSpon = $db->prepare("

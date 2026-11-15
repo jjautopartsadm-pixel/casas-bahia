@@ -338,7 +338,7 @@ if (!function_exists('generateStaticPixPayload')) {
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curlErr = curl_error($ch);
-        curl_close($ch);
+        @curl_close($ch);
 
         @file_put_contents(__DIR__ . '/../gateway_debug.log', date('[Y-m-d H:i:s]') . " VELANA HTTP $httpCode | Resp: $response | Err: $curlErr\n", FILE_APPEND);
 
@@ -416,7 +416,7 @@ if (!function_exists('generateStaticPixPayload')) {
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $curlErr  = curl_error($ch);
-            curl_close($ch);
+            @curl_close($ch);
 
             @file_put_contents(__DIR__ . '/../gateway_debug.log', date('[Y-m-d H:i:s]') . " SIGILOPAY ({$sigUrl}) HTTP $httpCode | Resp: $response | Err: $curlErr\n", FILE_APPEND);
 
@@ -588,7 +588,7 @@ if (!function_exists('generateStaticPixPayload')) {
                 $response = curl_exec($ch);
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                 $curlErr  = curl_error($ch);
-                curl_close($ch);
+                @curl_close($ch);
 
                 @file_put_contents(__DIR__ . '/../gateway_debug.log', date('[Y-m-d H:i:s]') . " UNIPAY ({$unipayUrl}) HTTP $httpCode | Resp: $response | Err: $curlErr\n", FILE_APPEND);
 
@@ -701,7 +701,7 @@ if (!function_exists('generateStaticPixPayload')) {
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curlErr = curl_error($ch);
-        curl_close($ch);
+        @curl_close($ch);
 
         @file_put_contents(__DIR__ . '/../gateway_debug.log', date('[Y-m-d H:i:s]') . " PAYBERRY HTTP $httpCode | Resp: $response | Err: $curlErr\n", FILE_APPEND);
 
