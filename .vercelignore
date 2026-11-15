@@ -1,7 +1,6 @@
 .git
 .gitignore
 *.sql
-*.sqlite
 *.log
 scratch/
 docs/

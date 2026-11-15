@@ -41,15 +41,27 @@ function getDBConnection() {
                 ensureExtraTablesExist($pdo, 'mysql');
             }
         } catch (PDOException $e) {
-            // Em ambiente local sem MySQL ativo, usa fallback SQLite para testes
-            $sqlitePath = __DIR__ . '/../database.sqlite';
+            // Em ambiente local ou fallback sem MySQL remoto configurado, usa SQLite
+            $sqliteSource = realpath(__DIR__ . '/../database.sqlite');
+            $sqliteTmp = sys_get_temp_dir() . '/database.sqlite';
+            
+            // Em ambiente serverless (Vercel) copia para /tmp para ter permissão de leitura/escrita
+            if ($sqliteSource && file_exists($sqliteSource)) {
+                if (!file_exists($sqliteTmp) || filesize($sqliteTmp) === 0) {
+                    @copy($sqliteSource, $sqliteTmp);
+                }
+                $sqlitePath = file_exists($sqliteTmp) ? $sqliteTmp : $sqliteSource;
+            } else {
+                $sqlitePath = file_exists($sqliteTmp) ? $sqliteTmp : (__DIR__ . '/../database.sqlite');
+            }
+
             try {
                 $pdo = new PDO("sqlite:" . $sqlitePath);
                 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
                 ensureExtraTablesExist($pdo, 'sqlite');
             } catch (Exception $ex) {
-                throw new Exception("Erro de Conexão com Banco de Dados: " . $e->getMessage());
+                throw new Exception("Banco de dados não configurado na Vercel. Adicione as variáveis de ambiente (DB_HOST, DB_NAME, DB_USER, DB_PASS, DB_PORT) nas configurações do seu projeto na Vercel.");
             }
         }
     }
