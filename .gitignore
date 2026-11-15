@@ -1,5 +1,4 @@
 *.sql
-*.sqlite
 *.log
 gateway_debug.log
 config/visit_reset.time
