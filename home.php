@@ -220,10 +220,15 @@ try {
     .cat-label { font-size: 12.5px; font-weight: 500; color: #003399; line-height: 1.25; text-align: center; white-space: nowrap; letter-spacing: -0.2px; }
 
     /* SLIDER HERO CARROSSEL (FULL BLEED SEM BORDAS LATERAIS) */
-    .hero-carousel-container { position: relative; width: 100%; margin-bottom: 8px; overflow: hidden; }
+    .hero-carousel-container { position: relative; width: 100%; min-height: 180px; margin-bottom: 8px; overflow: hidden; background: #0f172a; }
     .hero-carousel-track { display: flex; transition: transform 0.4s ease-in-out; width: 100%; }
-    .hero-carousel-slide { width: 100%; flex: 0 0 100%; min-width: 100%; box-sizing: border-box; padding: 0; }
-    .banner-slide-img { width: 100%; height: auto; max-height: 280px; border-radius: 0; display: block; object-fit: cover; }
+    .hero-carousel-slide { width: 100%; flex: 0 0 100%; min-width: 100%; box-sizing: border-box; padding: 0; min-height: 180px; }
+    .banner-slide-img { width: 100%; height: 180px; min-height: 180px; max-height: 280px; border-radius: 0; display: block; object-fit: cover; }
+    @media (min-width: 768px) {
+      .hero-carousel-container { min-height: 260px; }
+      .hero-carousel-slide { min-height: 260px; }
+      .banner-slide-img { height: 260px; min-height: 260px; max-height: 360px; }
+    }
 
     /* BOLINHAS DE PAGINAÇÃO IGUAIS À FOTO DO USUÁRIO */
     .hero-carousel-dots { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; margin-bottom: 22px; flex-wrap: wrap; max-width: 90%; margin-left: auto; margin-right: auto; }
@@ -763,7 +768,7 @@ try {
                 $bUrl = (strpos($banner['image_url'], 'http') === 0 || strpos($banner['image_url'], 'data:') === 0) ? $banner['image_url'] : $banner['image_url'];
               ?>
               <?php if (isVideoMedia($bUrl)): ?>
-                <video src="<?= htmlspecialchars($bUrl) ?>" autoplay loop muted playsinline class="banner-slide-img" style="width: 100%; height: auto; max-height: 280px; border-radius: 0; object-fit: cover; display: block;"></video>
+                <video src="<?= htmlspecialchars($bUrl) ?>" autoplay loop muted playsinline preload="auto" class="banner-slide-img" style="border-radius: 0; object-fit: cover; display: block;"></video>
               <?php else: ?>
                 <img src="<?= htmlspecialchars($bUrl) ?>" alt="Banner Promoção" class="banner-slide-img">
               <?php endif; ?>

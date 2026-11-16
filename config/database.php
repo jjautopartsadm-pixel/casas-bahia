@@ -359,7 +359,7 @@ function ensureExtraTablesExist($pdo, $driver = 'mysql') {
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS home_banners (
                 id $pkType,
-                image_url TEXT NOT NULL,
+                image_url LONGTEXT NOT NULL,
                 link_url VARCHAR(500) DEFAULT '#',
                 sort_order INT DEFAULT 1,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -371,10 +371,13 @@ function ensureExtraTablesExist($pdo, $driver = 'mysql') {
                 id $pkType,
                 slug VARCHAR(50) UNIQUE,
                 title VARCHAR(100) NOT NULL,
-                image_url TEXT NOT NULL,
+                image_url LONGTEXT NOT NULL,
                 sort_order INT DEFAULT 1
             );
         ");
+
+        try { $pdo->exec("ALTER TABLE `home_banners` MODIFY COLUMN `image_url` LONGTEXT"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE `home_categories` MODIFY COLUMN `image_url` LONGTEXT"); } catch (Exception $e) {}
 
         try {
             $catCount = $pdo->query("SELECT COUNT(*) FROM home_categories")->fetchColumn();

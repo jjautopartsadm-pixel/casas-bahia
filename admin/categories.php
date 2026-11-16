@@ -37,8 +37,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $fileData = @file_get_contents($fileTmp);
                     if ($fileData !== false && strlen($fileData) > 0) {
+                        $fileExt = strtolower(pathinfo($_FILES['cat_file']['name'], PATHINFO_EXTENSION));
                         $mime = 'image/gif';
-                        if (function_exists('mime_content_type')) {
+                        if (in_array($fileExt, ['mp4', 'webm', 'mov', 'm4v'])) {
+                            $mime = 'video/' . ($fileExt === 'mov' ? 'mp4' : $fileExt);
+                        } elseif ($fileExt === 'png') {
+                            $mime = 'image/png';
+                        } elseif (in_array($fileExt, ['jpg', 'jpeg'])) {
+                            $mime = 'image/jpeg';
+                        } elseif ($fileExt === 'webp') {
+                            $mime = 'image/webp';
+                        } elseif (function_exists('mime_content_type')) {
                             $detected = @mime_content_type($fileTmp);
                             if ($detected) $mime = $detected;
                         }
@@ -92,8 +101,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $fileData = @file_get_contents($fileTmp);
                     if ($fileData !== false && strlen($fileData) > 0) {
+                        $fileExt = strtolower(pathinfo($_FILES['cat_file']['name'], PATHINFO_EXTENSION));
                         $mime = 'image/gif';
-                        if (function_exists('mime_content_type')) {
+                        if (in_array($fileExt, ['mp4', 'webm', 'mov', 'm4v'])) {
+                            $mime = 'video/' . ($fileExt === 'mov' ? 'mp4' : $fileExt);
+                        } elseif ($fileExt === 'png') {
+                            $mime = 'image/png';
+                        } elseif (in_array($fileExt, ['jpg', 'jpeg'])) {
+                            $mime = 'image/jpeg';
+                        } elseif ($fileExt === 'webp') {
+                            $mime = 'image/webp';
+                        } elseif (function_exists('mime_content_type')) {
                             $detected = @mime_content_type($fileTmp);
                             if ($detected) $mime = $detected;
                         }
