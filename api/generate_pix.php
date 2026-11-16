@@ -1,5 +1,8 @@
 <?php
+ob_start();
 header('Content-Type: application/json');
+@ini_set('display_errors', '0');
+error_reporting(0);
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/zapi_service.php';
 
@@ -451,15 +454,8 @@ if (!function_exists('generateStaticPixPayload')) {
         } else {
             $errJson = json_decode($response, true);
             $sigMsg = $errJson['message'] ?? '';
-            if (stripos($sigMsg, '250') !== false || stripos($sigMsg, 'Preço') !== false) {
-                echo json_encode([
-                    'status'  => 'error',
-                    'message' => 'SigiloPay: O valor de R$ ' . number_format($product['pix_price'], 2, ',', '.') . ' excede o limite inicial de R$ 250,00 da sua conta SigiloPay. Solicite aumento de limite no suporte da SigiloPay ou teste com um produto até R$ 250,00.'
-                ]);
-                exit;
-            } else {
-                $apiError = "SigiloPay HTTP $httpCode - " . ($sigMsg ?: $response);
-            }
+            $apiError = "SigiloPay HTTP $httpCode - " . ($sigMsg ?: $response);
+            @file_put_contents(__DIR__ . '/../gateway_debug.log', date('[Y-m-d H:i:s]') . " [SIGILOPAY_ERROR] {$apiError}\n", FILE_APPEND);
         }
 
         // Se a SigiloPay não retornou código (por exemplo limite de valor atingido na conta), gera o Pix de contingência
@@ -468,10 +464,6 @@ if (!function_exists('generateStaticPixPayload')) {
             $mKey  = (!empty($gw['manual_pix_key'])) ? $gw['manual_pix_key'] : '04891248109';
             $mName = (!empty($gw['manual_pix_name'])) ? $gw['manual_pix_name'] : 'CASAS BAHIA';
             $mCity = (!empty($gw['manual_pix_city'])) ? $gw['manual_pix_city'] : 'SAO PAULO';
-            $pixCode   = generateStaticPixPayload($mKey, $mName, $mCity, $product['pix_price'], strval($orderId), $mType);
-            $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($pixCode);
-            $httpCode  = 200;
-        }
             $pixCode   = generateStaticPixPayload($mKey, $mName, $mCity, $product['pix_price'], strval($orderId), $mType);
             $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($pixCode);
             $httpCode  = 200;
@@ -762,6 +754,7 @@ if (!function_exists('generateStaticPixPayload')) {
         @file_put_contents(__DIR__ . '/../gateway_debug.log', date('[Y-m-d H:i:s]') . " [ZAPI_TRIGGER_ERROR] " . $eZapi->getMessage() . "\n", FILE_APPEND);
     }
 
+    @ob_clean();
     echo json_encode([
         'status' => 'success',
         'active_gateway' => $activeGateway,
@@ -774,8 +767,10 @@ if (!function_exists('generateStaticPixPayload')) {
         'api_error' => $apiError
     ]);
 
-} catch (Exception $e) {
-    // Retorno de emergência caso haja erro de conexão no MySQL
+} catch (Throwable $e) {
+    @ob_clean();
+    @file_put_contents(__DIR__ . '/../gateway_debug.log', date('[Y-m-d H:i:s]') . " [FATAL_PIX_EXCEPTION] " . $e->getMessage() . "\n", FILE_APPEND);
+    // Retorno de emergência caso haja qualquer erro
     echo json_encode([
         'status' => 'success',
         'active_gateway' => 'manual',

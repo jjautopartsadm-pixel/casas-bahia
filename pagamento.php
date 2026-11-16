@@ -485,9 +485,21 @@ $formattedRegularPrice = number_format($product['regular_price'] ?? ($product['p
           method: 'POST',
           body: formData
         });
-        const data = await res.json();
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch(pe) {
+          console.error('Non-JSON response:', text);
+          alert('Erro no processamento do Pix. Tente novamente.');
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Finalizar com Pix';
+          }
+          return;
+        }
 
-        if (data.status === 'success' && data.order_id) {
+        if (data && data.status === 'success' && data.order_id) {
           if (clientCpf) {
             try {
               var session = {
@@ -502,14 +514,15 @@ $formattedRegularPrice = number_format($product['regular_price'] ?? ($product['p
           try { localStorage.setItem('last_order_id', data.order_id); } catch(e) {}
           window.location.href = 'pix.php?order_id=' + data.order_id;
         } else {
-          alert('Erro ao gerar pagamento: ' + (data.message || 'Tente novamente.'));
+          alert('Aviso ao gerar pagamento: ' + ((data && data.message) || 'Tente novamente.'));
           if (btn) {
             btn.disabled = false;
             btn.textContent = 'Finalizar com Pix';
           }
         }
       } catch(err) {
-        alert('Erro de conexão ao gerar o Pix. Tente novamente.');
+        console.error('Fetch error:', err);
+        alert('Erro de conexão ao gerar o Pix. Verifique sua rede e tente novamente.');
         if (btn) {
           btn.disabled = false;
           btn.textContent = 'Finalizar com Pix';
