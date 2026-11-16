@@ -74,6 +74,16 @@ function getDBConnection() {
     return $pdo;
 }
 
+function isVideoMedia($url) {
+    if (empty($url)) return false;
+    if (strpos($url, 'data:video/') === 0) return true;
+    $cleanPath = parse_url($url, PHP_URL_PATH) ?? '';
+    $ext = strtolower(pathinfo($cleanPath, PATHINFO_EXTENSION));
+    if (in_array($ext, ['mp4', 'webm', 'mov', 'm4v', 'ogg'])) return true;
+    if (preg_match('/\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i', $url)) return true;
+    return false;
+}
+
 function ensureExtraTablesExist($pdo, $driver = 'mysql') {
     try {
         if ($driver === 'pgsql') {

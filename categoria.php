@@ -286,10 +286,9 @@ if (empty($filteredProducts)) {
         <div class="cat-icon-circle">
           <?php if (!empty($cat['image_url'])): ?>
             <?php 
-              $cUrl = (strpos($cat['image_url'], 'http') === 0) ? $cat['image_url'] : $cat['image_url'];
-              $cExt = strtolower(pathinfo(parse_url($cUrl, PHP_URL_PATH), PATHINFO_EXTENSION));
+              $cUrl = (strpos($cat['image_url'], 'http') === 0 || strpos($cat['image_url'], 'data:') === 0) ? $cat['image_url'] : $cat['image_url'];
             ?>
-            <?php if (in_array($cExt, ['mp4', 'webm', 'mov'])): ?>
+            <?php if (isVideoMedia($cUrl)): ?>
               <video src="<?= htmlspecialchars($cUrl) ?>" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px; pointer-events: none; display: block; border: none;"></video>
             <?php else: ?>
               <img src="<?= htmlspecialchars($cUrl) ?>" alt="<?= htmlspecialchars($cat['title']) ?>" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px; display: block; border: none;">
@@ -338,7 +337,7 @@ if (empty($filteredProducts)) {
         </div>
 
         <div class="card-img-wrapper">
-          <?php if (in_array($pImgExt, ['mp4', 'webm', 'mov'])): ?>
+          <?php if (isVideoMedia($pImg)): ?>
             <video src="<?= htmlspecialchars($pImg) ?>" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: contain;"></video>
           <?php else: ?>
             <img src="<?= htmlspecialchars($pImg) ?>" alt="<?= htmlspecialchars($prod['title']) ?>">

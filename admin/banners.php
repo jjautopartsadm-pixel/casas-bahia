@@ -43,8 +43,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Ambiente Serverless (Vercel) com disco somente-leitura: armazena como Data URI Base64
                         $fileData = @file_get_contents($fileTmp);
                         if ($fileData !== false && strlen($fileData) > 0) {
+                            $fileExt = strtolower(pathinfo($_FILES['banner_file']['name'], PATHINFO_EXTENSION));
                             $mime = 'image/jpeg';
-                            if (function_exists('mime_content_type')) {
+                            if (in_array($fileExt, ['mp4', 'webm', 'mov', 'm4v'])) {
+                                $mime = 'video/' . ($fileExt === 'mov' ? 'mp4' : $fileExt);
+                            } elseif ($fileExt === 'gif') {
+                                $mime = 'image/gif';
+                            } elseif ($fileExt === 'png') {
+                                $mime = 'image/png';
+                            } elseif ($fileExt === 'webp') {
+                                $mime = 'image/webp';
+                            } elseif (function_exists('mime_content_type')) {
                                 $detected = @mime_content_type($fileTmp);
                                 if ($detected) $mime = $detected;
                             }
@@ -108,8 +117,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Ambiente Serverless (Vercel) com disco somente-leitura: armazena como Data URI Base64
                         $fileData = @file_get_contents($fileTmp);
                         if ($fileData !== false && strlen($fileData) > 0) {
+                            $catFileExt = strtolower(pathinfo($_FILES['cat_file']['name'], PATHINFO_EXTENSION));
                             $mime = 'image/gif';
-                            if (function_exists('mime_content_type')) {
+                            if (in_array($catFileExt, ['mp4', 'webm', 'mov', 'm4v'])) {
+                                $mime = 'video/' . ($catFileExt === 'mov' ? 'mp4' : $catFileExt);
+                            } elseif ($catFileExt === 'png') {
+                                $mime = 'image/png';
+                            } elseif ($catFileExt === 'webp') {
+                                $mime = 'image/webp';
+                            } elseif ($catFileExt === 'jpg' || $catFileExt === 'jpeg') {
+                                $mime = 'image/jpeg';
+                            } elseif (function_exists('mime_content_type')) {
                                 $detected = @mime_content_type($fileTmp);
                                 if ($detected) $mime = $detected;
                             }
@@ -212,11 +230,15 @@ try {
     .dot-item { width: 12px; height: 12px; border-radius: 50%; background: #e2e8f0; transition: all 0.2s; }
     .dot-item.active { background: #003399; transform: scale(1.2); }
 
-    .banners-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .banners-table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
     .banners-table th { text-align: left; padding: 12px; background: #f8fafc; color: #64748b; font-size: 13px; font-weight: 800; border-bottom: 1px solid #e2e8f0; }
-    .banners-table td { padding: 16px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .banners-table th:nth-child(1) { width: 70px; }
+    .banners-table th:nth-child(2) { width: 180px; }
+    .banners-table th:nth-child(3) { width: auto; }
+    .banners-table th:nth-child(4) { width: 110px; text-align: center; }
+    .banners-table td { padding: 14px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; }
     
-    .banner-thumb { width: 160px; height: 70px; border-radius: 8px; object-fit: cover; border: 1px solid #e2e8f0; }
+    .banner-thumb { width: 160px; height: 70px; border-radius: 8px; object-fit: cover; border: 1px solid #e2e8f0; display: block; background: #000000; }
     .cat-thumb { width: 54px; height: 54px; border-radius: 16px; object-fit: cover; background: #0a0a0a; }
     
     .btn-del { background: #ef4444; color: #ffffff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 800; font-size: 12px; cursor: pointer; }
@@ -267,9 +289,8 @@ try {
                 <?php if (!empty($cat['image_url'])): ?>
                   <?php 
                     $displayCatUrl = (strpos($cat['image_url'], 'http') === 0 || strpos($cat['image_url'], '/') === 0 || strpos($cat['image_url'], 'data:') === 0) ? $cat['image_url'] : '../' . $cat['image_url'];
-                    $catExt = strtolower(pathinfo(parse_url($displayCatUrl, PHP_URL_PATH), PATHINFO_EXTENSION));
                   ?>
-                  <?php if (in_array($catExt, ['mp4', 'webm', 'mov'])): ?>
+                  <?php if (isVideoMedia($displayCatUrl)): ?>
                     <video src="<?= htmlspecialchars($displayCatUrl) ?>" autoplay loop muted playsinline class="cat-thumb" style="object-fit: cover;"></video>
                   <?php else: ?>
                     <img src="<?= htmlspecialchars($displayCatUrl) ?>" class="cat-thumb" alt="Ícone">
@@ -360,19 +381,24 @@ try {
             <?php foreach ($banners as $idx => $b): ?>
               <?php 
                 $displayBannerUrl = (strpos($b['image_url'], 'http') === 0 || strpos($b['image_url'], '/') === 0 || strpos($b['image_url'], 'data:') === 0) ? $b['image_url'] : '../' . $b['image_url'];
-                $bExt = strtolower(pathinfo(parse_url($displayBannerUrl, PHP_URL_PATH), PATHINFO_EXTENSION));
               ?>
               <tr>
                 <td><strong>#<?= $b['sort_order'] ?></strong></td>
                 <td>
-                  <?php if (in_array($bExt, ['mp4', 'webm', 'mov'])): ?>
+                  <?php if (isVideoMedia($displayBannerUrl)): ?>
                     <video src="<?= htmlspecialchars($displayBannerUrl) ?>" autoplay loop muted playsinline class="banner-thumb" style="object-fit: cover;"></video>
                   <?php else: ?>
                     <img src="<?= htmlspecialchars($displayBannerUrl) ?>" class="banner-thumb" alt="Banner">
                   <?php endif; ?>
                 </td>
-                <td style="font-family: monospace; font-size: 12px; color: #64748b;">
-                  <?= htmlspecialchars($b['image_url']) ?>
+                <td style="font-family: monospace; font-size: 12px; color: #64748b; max-width: 320px; word-break: break-all;">
+                  <?php if (strpos($b['image_url'], 'data:video') === 0): ?>
+                    <span style="display:inline-block; background: #e0e7ff; color: #3730a3; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">🎥 Vídeo Carregado (Base64)</span>
+                  <?php elseif (strpos($b['image_url'], 'data:image') === 0): ?>
+                    <span style="display:inline-block; background: #ecfdf5; color: #065f46; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">🖼️ Imagem Carregada (Base64)</span>
+                  <?php else: ?>
+                    <?= htmlspecialchars($b['image_url']) ?>
+                  <?php endif; ?>
                 </td>
                 <td>
                   <form method="POST" style="display:inline;" onsubmit="return confirm('Deseja realmente remover este banner?');">

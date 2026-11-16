@@ -1523,10 +1523,7 @@ $product['discount_percentage'] = $realPercent;
 
       <!-- Main Image View -->
       <div class="main-image-container" id="mainImageWrapper">
-        <?php 
-          $mainExt = strtolower(pathinfo(parse_url($mainImage, PHP_URL_PATH), PATHINFO_EXTENSION));
-        ?>
-        <?php if (in_array($mainExt, ['mp4', 'webm', 'mov'])): ?>
+        <?php if (isVideoMedia($mainImage)): ?>
           <video id="mainProductVideo" src="<?= htmlspecialchars($mainImage) ?>" autoplay loop muted playsinline style="max-width: 100%; max-height: 100%; object-fit: contain;"></video>
           <img id="mainProductImage" src="<?= htmlspecialchars($mainImage) ?>" alt="<?= htmlspecialchars($product['title']) ?>" style="display: none;">
         <?php else: ?>
@@ -1545,11 +1542,8 @@ $product['discount_percentage'] = $realPercent;
         </div>
 
         <?php foreach ($images as $index => $img): ?>
-          <?php 
-            $tExt = strtolower(pathinfo(parse_url($img['image_url'], PHP_URL_PATH), PATHINFO_EXTENSION));
-          ?>
           <div class="thumb-item <?= $index === 0 ? 'active' : '' ?>" data-src="<?= htmlspecialchars($img['image_url']) ?>">
-            <?php if (in_array($tExt, ['mp4', 'webm', 'mov'])): ?>
+            <?php if (isVideoMedia($img['image_url'])): ?>
               <video src="<?= htmlspecialchars($img['image_url']) ?>" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
             <?php else: ?>
               <img src="<?= htmlspecialchars($img['image_url']) ?>" alt="Thumbnail <?= $index + 1 ?>">

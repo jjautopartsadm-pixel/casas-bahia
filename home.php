@@ -226,7 +226,7 @@ try {
     .banner-slide-img { width: 100%; height: auto; max-height: 280px; border-radius: 0; display: block; object-fit: cover; }
 
     /* BOLINHAS DE PAGINAÇÃO IGUAIS À FOTO DO USUÁRIO */
-    .hero-carousel-dots { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; margin-bottom: 22px; }
+    .hero-carousel-dots { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; margin-bottom: 22px; flex-wrap: wrap; max-width: 90%; margin-left: auto; margin-right: auto; }
     .carousel-dot { width: 12px; height: 12px; border-radius: 50%; background-color: #e2e8f0; border: none; cursor: pointer; transition: all 0.25s ease; padding: 0; }
     .carousel-dot.active { background-color: #003399; transform: scale(1.25); width: 14px; height: 14px; }
     
@@ -725,10 +725,9 @@ try {
         <div class="cat-icon-circle">
           <?php if (!empty($cat['image_url'])): ?>
             <?php 
-              $cUrl = (strpos($cat['image_url'], 'http') === 0) ? $cat['image_url'] : $cat['image_url'];
-              $cExt = strtolower(pathinfo(parse_url($cUrl, PHP_URL_PATH), PATHINFO_EXTENSION));
+              $cUrl = (strpos($cat['image_url'], 'http') === 0 || strpos($cat['image_url'], 'data:') === 0) ? $cat['image_url'] : $cat['image_url'];
             ?>
-            <?php if (in_array($cExt, ['mp4', 'webm', 'mov'])): ?>
+            <?php if (isVideoMedia($cUrl)): ?>
               <video src="<?= htmlspecialchars($cUrl) ?>" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; border-radius: 22px; pointer-events: none; display: block; border: none;"></video>
             <?php else: ?>
               <img src="<?= htmlspecialchars($cUrl) ?>" alt="<?= htmlspecialchars($cat['title']) ?>" style="width: 100%; height: 100%; object-fit: cover; border-radius: 22px; display: block; border: none;">
@@ -761,10 +760,9 @@ try {
               </div>
             <?php else: ?>
               <?php 
-                $bUrl = (strpos($banner['image_url'], 'http') === 0) ? $banner['image_url'] : $banner['image_url'];
-                $bExt = strtolower(pathinfo(parse_url($bUrl, PHP_URL_PATH), PATHINFO_EXTENSION));
+                $bUrl = (strpos($banner['image_url'], 'http') === 0 || strpos($banner['image_url'], 'data:') === 0) ? $banner['image_url'] : $banner['image_url'];
               ?>
-              <?php if (in_array($bExt, ['mp4', 'webm', 'mov'])): ?>
+              <?php if (isVideoMedia($bUrl)): ?>
                 <video src="<?= htmlspecialchars($bUrl) ?>" autoplay loop muted playsinline class="banner-slide-img" style="width: 100%; height: auto; max-height: 280px; border-radius: 0; object-fit: cover; display: block;"></video>
               <?php else: ?>
                 <img src="<?= htmlspecialchars($bUrl) ?>" alt="Banner Promoção" class="banner-slide-img">

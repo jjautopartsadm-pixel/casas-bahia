@@ -275,9 +275,8 @@ try {
                 <?php if (!empty($cat['image_url'])): ?>
                   <?php 
                     $displayCatUrl = (strpos($cat['image_url'], 'http') === 0 || strpos($cat['image_url'], '/') === 0 || strpos($cat['image_url'], 'data:') === 0) ? $cat['image_url'] : '../' . $cat['image_url'];
-                    $catExt = strtolower(pathinfo(parse_url($displayCatUrl, PHP_URL_PATH), PATHINFO_EXTENSION));
                   ?>
-                  <?php if (in_array($catExt, ['mp4', 'webm', 'mov'])): ?>
+                  <?php if (isVideoMedia($displayCatUrl)): ?>
                     <video src="<?= htmlspecialchars($displayCatUrl) ?>" autoplay loop muted playsinline class="cat-thumb" style="object-fit: cover;"></video>
                   <?php else: ?>
                     <img src="<?= htmlspecialchars($displayCatUrl) ?>" class="cat-thumb" alt="Ícone">
