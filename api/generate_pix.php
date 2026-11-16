@@ -466,6 +466,9 @@ if (!function_exists('generateStaticPixPayload')) {
                 }
 
                 if (!empty($pixCode)) { break; }
+            } else {
+                $errJson = json_decode($response, true);
+                $apiError = "SigiloPay HTTP $httpCode - " . ($errJson['message'] ?? $response);
             }
         }
 
