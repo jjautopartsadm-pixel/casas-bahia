@@ -220,9 +220,9 @@ try {
     .cat-label { font-size: 12.5px; font-weight: 500; color: #003399; line-height: 1.25; text-align: center; white-space: nowrap; letter-spacing: -0.2px; }
 
     /* SLIDER HERO CARROSSEL (FULL BLEED SEM BORDAS LATERAIS) */
-    .hero-carousel-container { position: relative; width: 100%; min-height: 180px; margin-bottom: 8px; overflow: hidden; background: #0f172a; }
-    .hero-carousel-track { display: flex; transition: transform 0.4s ease-in-out; width: 100%; }
-    .hero-carousel-slide { width: 100%; flex: 0 0 100%; min-width: 100%; box-sizing: border-box; padding: 0; min-height: 180px; }
+    .hero-carousel-container { position: relative; width: 100%; min-height: 180px; margin-bottom: 0; overflow: hidden; background: #ffffff; }
+    .hero-carousel-track { display: flex; transition: transform 0.4s ease-in-out; width: 100%; background: #ffffff; }
+    .hero-carousel-slide { width: 100%; flex: 0 0 100%; min-width: 100%; box-sizing: border-box; padding: 0; min-height: 180px; background: #ffffff; }
     .banner-slide-img { width: 100%; height: 180px; min-height: 180px; max-height: 280px; border-radius: 0; display: block; object-fit: cover; }
     @media (min-width: 768px) {
       .hero-carousel-container { min-height: 260px; }
@@ -230,10 +230,10 @@ try {
       .banner-slide-img { height: 260px; min-height: 260px; max-height: 360px; }
     }
 
-    /* BOLINHAS DE PAGINAÇÃO IGUAIS À FOTO DO USUÁRIO */
-    .hero-carousel-dots { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; margin-bottom: 22px; flex-wrap: wrap; max-width: 90%; margin-left: auto; margin-right: auto; }
-    .carousel-dot { width: 12px; height: 12px; border-radius: 50%; background-color: #e2e8f0; border: none; cursor: pointer; transition: all 0.25s ease; padding: 0; }
-    .carousel-dot.active { background-color: #003399; transform: scale(1.25); width: 14px; height: 14px; }
+    /* BOLINHAS DE PAGINAÇÃO (FUNDO 100% BRANCO) */
+    .hero-carousel-dots { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; margin-bottom: 20px; flex-wrap: wrap; max-width: 90%; margin-left: auto; margin-right: auto; background: #ffffff; padding: 4px 0; }
+    .carousel-dot { width: 10px; height: 10px; border-radius: 50%; background-color: #cbd5e1; border: none; cursor: pointer; transition: all 0.25s ease; padding: 0; }
+    .carousel-dot.active { background-color: #003399; transform: scale(1.25); width: 12px; height: 12px; }
     
     /* MODAL TELA INTEIRA: MEUS PEDIDOS */
     .full-page-orders-modal {
@@ -777,13 +777,13 @@ try {
         </div>
       <?php endforeach; ?>
     </div>
+  </div>
 
-    <!-- BOLINHAS DE PAGINAÇÃO DO CARROSSEL (EXATAMENTE COMO NA FOTO ENVIADA PELO USUÁRIO) -->
-    <div class="hero-carousel-dots" id="heroCarouselDots">
-      <?php for ($d = 0; $d < count($banners); $d++): ?>
-        <button class="carousel-dot <?= ($d === 0) ? 'active' : '' ?>" onclick="goToSlide(<?= $d ?>)" aria-label="Slide <?= $d + 1 ?>"></button>
-      <?php endfor; ?>
-    </div>
+  <!-- BOLINHAS DE PAGINAÇÃO DO CARROSSEL (FUNDO 100% BRANCO) -->
+  <div class="hero-carousel-dots" id="heroCarouselDots">
+    <?php for ($d = 0; $d < count($banners); $d++): ?>
+      <button class="carousel-dot <?= ($d === 0) ? 'active' : '' ?>" onclick="goToSlide(<?= $d ?>)" aria-label="Slide <?= $d + 1 ?>"></button>
+    <?php endfor; ?>
   </div>
 
   <!-- SEÇÃO 1: OFERTAS RELÂMPAGO (HEADER E CARDS HORIZONTAIS 100% IDÊNTICOS À FOTO 2) -->
