@@ -53,10 +53,12 @@ if ($isEmptyCart || !$product) {
     
     .top-red-line { height: 4px; background-color: var(--cb-red); width: 100%; }
 
-    header { background: #ffffff; padding: 14px 16px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
-    .brand-logo { font-size: 20px; font-weight: 900; color: var(--cb-blue); text-decoration: none; letter-spacing: -0.5px; }
-    .brand-logo span { color: var(--cb-red); }
-    .accessibility-icon { color: var(--cb-blue); display: flex; align-items: center; }
+    header { background: #000000; padding: 14px 16px; border-bottom: 1px solid #111111; display: flex; align-items: center; justify-content: space-between; }
+    .brand-logo { font-size: 20px; font-weight: 900; color: #ffffff; text-decoration: none; letter-spacing: -0.5px; }
+    .brand-logo span { color: #ffffff; }
+    .accessibility-icon { color: #ffffff; display: flex; align-items: center; }
+    .accessibility-icon svg { stroke: #ffffff !important; }
+    .accessibility-icon svg circle:nth-child(2) { fill: #ffffff !important; }
 
     .empty-cart-container { max-width: 520px; margin: 0 auto; padding: 20px 16px; }
     .cart-title-main { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 20px; }
@@ -176,10 +178,12 @@ $monthlyWarranty = round(($product['pix_price'] * 0.15) / 10, 2);
     .top-red-line { height: 4px; background-color: var(--cb-red); width: 100%; }
 
     /* HEADER */
-    header { background: #ffffff; padding: 14px 16px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-    .brand-logo { font-size: 20px; font-weight: 900; color: var(--cb-blue); text-decoration: none; letter-spacing: -0.5px; }
-    .brand-logo span { color: var(--cb-red); }
-    .accessibility-icon { color: var(--cb-blue); display: flex; align-items: center; cursor: pointer; }
+    header { background: #000000; padding: 14px 16px; border-bottom: 1px solid #111111; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .brand-logo { font-size: 20px; font-weight: 900; color: #ffffff; text-decoration: none; letter-spacing: -0.5px; }
+    .brand-logo span { color: #ffffff; }
+    .accessibility-icon { color: #ffffff; display: flex; align-items: center; cursor: pointer; }
+    .accessibility-icon svg { stroke: #ffffff !important; }
+    .accessibility-icon svg circle:nth-child(2) { fill: #ffffff !important; }
 
     /* CONTAINER PRINCIPAL DO CARRINHO */
     .cart-container { max-width: 480px; margin: 0 auto; padding: 16px; }
