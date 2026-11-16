@@ -399,13 +399,16 @@ function ensureExtraTablesExist($pdo, $driver = 'mysql') {
         try { $pdo->exec("ALTER TABLE access_control_settings ADD COLUMN master_token VARCHAR(100) DEFAULT 'promo'"); } catch (Exception $e) {}
         try { $pdo->exec("ALTER TABLE access_control_settings ADD COLUMN session_duration_hours INT DEFAULT 24"); } catch (Exception $e) {}
 
-        $pdo->exec("
-            $insertIgnore INTO access_control_settings (
-                id, is_enabled, block_action, redirect_url, param_name, master_token, session_duration_hours
-            ) VALUES (
-                1, 1, 'redirect', 'https://www.casasbahia.com.br', 'src', 'promo', 24
-            );
-        ");
+        $rowAc = $pdo->query("SELECT id FROM access_control_settings WHERE id = 1")->fetch();
+        if (!$rowAc) {
+            $pdo->exec("
+                INSERT INTO access_control_settings (
+                    id, is_enabled, block_action, redirect_url, param_name, master_token, session_duration_hours
+                ) VALUES (
+                    1, 1, 'redirect', 'https://www.casasbahia.com.br', 'src', 'promo', 24
+                )
+            ");
+        }
 
         // Tabela de Links de Campanha Gerados
         $pdo->exec("

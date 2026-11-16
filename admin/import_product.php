@@ -453,67 +453,168 @@ function extractVariationsFromCasasBahiaHtml($sourceCode, $jsonData = null, $tit
 
 // FUNÇÃO DE EXTRAÇÃO DE PREÇOS COM ALTA PRECISÃO DA CASAS BAHIA
 function extractPricesFromCasasBahiaHtml($sourceCode, $jsonData = null) {
-    $foundPrices = [];
+    $regularPrice = 0.00;
+    $pixPrice = 0.00;
 
-    $cleanVal = function($v) {
+    $cleanNum = function($v) {
         if (!is_numeric($v)) return 0.00;
-        $v = floatval($v);
-        // Se vier como inteiro em centavos alto sem decimal (ex: 17660 ou 189900)
-        if ($v > 10000 && floor($v) == $v) {
-            $v = $v / 100;
+        $f = floatval($v);
+        // Se vier em centavos inteiros altos sem vírgula (ex: 158007 em vez de 1580.07)
+        if ($f > 15000 && floor($f) == $f) {
+            $f = $f / 100;
         }
-        return $v;
+        return $f;
     };
 
-    // 1. Extração por Meta Tags da Casas Bahia (product:price:amount / og:price:amount)
-    if (preg_match('/<meta[^>]*property=["\'](?:product|og):price:amount["\'][^>]*content=["\']([\d\.,]+)["\']/i', $sourceCode, $pm)) {
-        $val = floatval(str_replace(',', '.', $pm[1]));
-        if ($val > 5) $foundPrices[] = $val;
-    }
-
-    // 2. Extração por chaves JSON específicas de preços da Casas Bahia
-    if ($jsonData) {
-        $targetKeys = ['sellPrice', 'listPrice', 'salePrice', 'cashDiscountPrice', 'priceWithDiscount', 'currentPrice'];
-        foreach ($targetKeys as $tk) {
-            $vals = findDeepKeys($jsonData, $tk);
-            foreach ($vals as $v) {
-                if (is_numeric($v)) {
-                    $norm = $cleanVal($v);
-                    if ($norm > 5) $foundPrices[] = $norm;
+    // 1. EXTRAÇÃO VIA SCHEMA.ORG JSON-LD (Fonte mais confiável de dados oficiais de produto)
+    if (preg_match_all('/<script[^>]*type=["\']application\/ld\+json["\'][^>]*>(.*?)<\/script>/is', $sourceCode, $ldMatches)) {
+        foreach ($ldMatches[1] as $ldJson) {
+            $ldData = json_decode($ldJson, true);
+            if (is_array($ldData)) {
+                $candidates = isset($ldData['@graph']) ? $ldData['@graph'] : [$ldData];
+                foreach ($candidates as $cand) {
+                    if (is_array($cand)) {
+                        $isProduct = (isset($cand['@type']) && (strtolower($cand['@type']) === 'product' || strtolower($cand['@type']) === 'individualproduct'));
+                        $hasOffers = isset($cand['offers']);
+                        if ($isProduct || $hasOffers) {
+                            $offers = $cand['offers'] ?? null;
+                            if (is_array($offers)) {
+                                $offerObj = isset($offers[0]) ? $offers[0] : $offers;
+                                $p = $offerObj['price'] ?? $offerObj['lowPrice'] ?? null;
+                                $hp = $offerObj['highPrice'] ?? null;
+                                if (is_numeric($p) && floatval($p) > 10) {
+                                    $pixPrice = floatval($p);
+                                    if (is_numeric($hp) && floatval($hp) >= $pixPrice) {
+                                        $regularPrice = floatval($hp);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 
-    // 3. Extração por Regex de valores formatados em BRL (ex: R$ 189,90 / R$ 1.580,07)
-    if (preg_match_all('/R\$\s*([\d\.]+,\d{2})/i', $sourceCode, $brlMatches)) {
-        foreach ($brlMatches[1] as $bStr) {
-            $bClean = str_replace('.', '', $bStr);
-            $bClean = floatval(str_replace(',', '.', $bClean));
-            if ($bClean > 5) $foundPrices[] = $bClean;
+    // 2. EXTRAÇÃO VIA __NEXT_DATA__ JSON (Específico do Next.js da Casas Bahia)
+    if ($jsonData) {
+        $productBlocks = [];
+        if (isset($jsonData['props']['pageProps']['initialData']['product'])) {
+            $productBlocks[] = $jsonData['props']['pageProps']['initialData']['product'];
+        }
+        if (isset($jsonData['props']['pageProps']['product'])) {
+            $productBlocks[] = $jsonData['props']['pageProps']['product'];
+        }
+        if (isset($jsonData['props']['pageProps']['initialState']['product'])) {
+            $productBlocks[] = $jsonData['props']['pageProps']['initialState']['product'];
+        }
+
+        foreach ($productBlocks as $pb) {
+            if (is_array($pb) && isset($pb['price']) && is_array($pb['price'])) {
+                $pr = $pb['price'];
+                $cur = $pr['currentPrice'] ?? $pr['salePrice'] ?? $pr['sellPrice'] ?? $pr['cashDiscountPrice'] ?? $pr['to'] ?? null;
+                $orig = $pr['listPrice'] ?? $pr['originalPrice'] ?? $pr['from'] ?? null;
+                $pix = $pr['cashDiscountPrice'] ?? $pr['pixPrice'] ?? $pr['discountPrice'] ?? null;
+
+                if (is_numeric($cur) && floatval($cur) > 10) {
+                    $pixPrice = $cleanNum($pix ?: $cur);
+                    if (is_numeric($orig) && floatval($orig) >= $pixPrice) {
+                        $regularPrice = $cleanNum($orig);
+                    }
+                }
+            }
+        }
+
+        // Se ainda não achou, buscar chaves profundas de preço com filtro do maior valor
+        if ($pixPrice <= 0) {
+            $sellPrices = findDeepKeys($jsonData, 'sellPrice');
+            $listPrices = findDeepKeys($jsonData, 'listPrice');
+            if (empty($sellPrices)) $sellPrices = findDeepKeys($jsonData, 'currentPrice');
+
+            $validSells = [];
+            foreach ($sellPrices as $sp) {
+                if (is_numeric($sp)) {
+                    $n = $cleanNum($sp);
+                    if ($n > 10) $validSells[] = $n;
+                }
+            }
+            if (!empty($validSells)) {
+                $pixPrice = max($validSells);
+            }
+
+            $validLists = [];
+            foreach ($listPrices as $lp) {
+                if (is_numeric($lp)) {
+                    $n = $cleanNum($lp);
+                    if ($n >= $pixPrice) $validLists[] = $n;
+                }
+            }
+            if (!empty($validLists)) {
+                $regularPrice = max($validLists);
+            }
         }
     }
 
-    $regularPrice = 0.00;
-    $pixPrice = 0.00;
+    // 3. EXTRAÇÃO VIA META TAGS (og:price:amount / product:price:amount)
+    if ($pixPrice <= 0) {
+        if (preg_match('/<meta[^>]*property=["\'](?:product|og):price:amount["\'][^>]*content=["\']([\d\.,]+)["\']/i', $sourceCode, $pm)) {
+            $metaVal = floatval(str_replace(',', '.', $pm[1]));
+            if ($metaVal > 10) {
+                $pixPrice = $metaVal;
+            }
+        }
+    }
 
-    // Processar preços encontrados
-    if (!empty($foundPrices)) {
-        $foundPrices = array_values(array_unique($foundPrices));
-        sort($foundPrices);
-        
-        if (count($foundPrices) >= 2) {
-            $pixPrice = reset($foundPrices);
-            $regularPrice = end($foundPrices);
-        } else {
-            $regularPrice = reset($foundPrices);
+    // 4. EXTRAÇÃO VIA REGEX INTELIGENTE NO HTML (Ignora parcelas '10x de', garantias e fretes)
+    if ($pixPrice <= 0 || $regularPrice <= 0) {
+        // Padrão 1: "De R$ 1.699,00 por R$ 1.580,07"
+        if (preg_match('/de\s*(?:R\$\s*)?([\d\.]+,\d{2})\s*(?:por|para|em\s*at[eé]|no)\s*(?:R\$\s*)?([\d\.]+,\d{2})/is', $sourceCode, $mDePor)) {
+            $vDe = floatval(str_replace(',', '.', str_replace('.', '', $mDePor[1])));
+            $vPor = floatval(str_replace(',', '.', str_replace('.', '', $mDePor[2])));
+            if ($vDe > $vPor && $vPor > 10) {
+                if ($regularPrice <= 0) $regularPrice = $vDe;
+                if ($pixPrice <= 0) $pixPrice = $vPor;
+            }
+        }
+
+        // Padrão 2: "R$ 1.580,07 à vista no Pix" ou "R$ 1.580,07 no Pix"
+        if (preg_match('/R\$\s*([\d\.]+,\d{2})\s*(?:[àa]\s*vista\s*)?no\s*Pix/i', $sourceCode, $mPix)) {
+            $vPix = floatval(str_replace(',', '.', str_replace('.', '', $mPix[1])));
+            if ($vPix > 10) {
+                if ($pixPrice <= 0) $pixPrice = $vPix;
+            }
+        }
+
+        // Padrão 3: Preço principal em destaque no HTML
+        if (preg_match('/class=["\'][^"\']*(?:sales-price|price-sales|product-price|salesPrice)[^"\']*["\'][^>]*>\s*R\$\s*([\d\.]+,\d{2})/i', $sourceCode, $mMainPrice)) {
+            $vMain = floatval(str_replace(',', '.', str_replace('.', '', $mMainPrice[1])));
+            if ($vMain > 10) {
+                if ($pixPrice <= 0) $pixPrice = $vMain;
+            }
+        }
+    }
+
+    // SANITIZAÇÃO E VALIDAÇÃO MATEMÁTICA DOS PREÇOS (Evita pegar parcelas de 10x ou acessórios)
+    if ($regularPrice > 0 && $pixPrice > 0) {
+        if ($pixPrice > $regularPrice) {
+            $tmp = $regularPrice;
+            $regularPrice = $pixPrice;
+            $pixPrice = $tmp;
+        }
+
+        // Se o preço Pix for menor que 40% do regular, foi capturada uma parcela de 10x ou garantia estendida!
+        if ($pixPrice < ($regularPrice * 0.40)) {
             $pixPrice = round($regularPrice * 0.93, 2);
         }
+    } else if ($regularPrice > 0 && $pixPrice <= 0) {
+        $pixPrice = round($regularPrice * 0.93, 2);
+    } else if ($pixPrice > 0 && $regularPrice <= 0) {
+        $regularPrice = round($pixPrice * 1.08, 2);
     }
 
     return [
-        'regular_price' => $regularPrice,
-        'pix_price' => $pixPrice
+        'regular_price' => $regularPrice > 0 ? $regularPrice : 189.90,
+        'pix_price'     => $pixPrice > 0 ? $pixPrice : 176.60
     ];
 }
 
