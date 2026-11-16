@@ -92,8 +92,8 @@ try {
     $siteHost = $_SERVER['HTTP_HOST'] ?? 'meucarrinho.online';
     $baseUrl = $protocol . $siteHost;
     $homeOgImage = $baseUrl . '/assets/images/casasbahia_home_share.jpg';
-    $pageOgTitle = "Casas Bahia: Black Friday - As Melhores Ofertas";
-    $pageOgDesc = "Aproveite as melhores ofertas da Black Friday com frete grátis e desconto exclusivo no Pix nas Casas Bahia!";
+    $pageOgTitle = "Casas Bahia: Ofertas de TV, Celulares, Eletrodomésticos e Móveis";
+    $pageOgDesc = "Aproveite as melhores ofertas com frete grátis e desconto exclusivo no Pix nas Casas Bahia. Compre agora!";
     $pageOgUrl = $baseUrl . '/home.php';
   ?>
   <meta property="og:type" content="website">
@@ -106,8 +106,7 @@ try {
   <meta property="og:image:width" content="783">
   <meta property="og:image:height" content="392">
   <meta property="og:url" content="<?= htmlspecialchars($pageOgUrl) ?>">
-  <link rel="image_src" href="<?= htmlspecialchars($homeOgImage) ?>">
-  <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="<?= htmlspecialchars($pageOgTitle) ?>">
   <meta name="twitter:description" content="<?= htmlspecialchars($pageOgDesc) ?>">
   <meta name="twitter:image" content="<?= htmlspecialchars($homeOgImage) ?>">
@@ -134,31 +133,25 @@ try {
     .top-red-line { height: 4px; background-color: var(--cb-red); width: 100%; }
 
     /* CABEÇALHO E BARRA DE CEP (100% IDÊNTICO AO INDEX) */
-    .main-header { background-color: #000000; border-bottom: 1px solid #111111; position: relative; z-index: 10; }
+    .main-header { background-color: #ffffff; border-bottom: 1px solid var(--cb-gray-border); position: relative; z-index: 10; }
     .header-top-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; }
     .header-left-group { display: flex; align-items: center; gap: 8px; }
-    .brand-logo { font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; line-height: 1; display: flex; align-items: center; text-decoration: none; }
-    .brand-logo span { color: #ffffff; }
+    .brand-logo { font-size: 20px; font-weight: 800; color: var(--cb-blue-primary); letter-spacing: -0.5px; line-height: 1; display: flex; align-items: center; }
+    .brand-logo span { color: var(--cb-red); }
     .header-actions { display: flex; gap: 14px; align-items: center; }
-    .header-icon-btn { background: none; border: none; color: #ffffff; cursor: pointer; display: flex; align-items: center; padding: 2px; }
-    .header-icon-btn svg { stroke: #ffffff !important; }
+    .header-icon-btn { background: none; border: none; color: var(--cb-blue-primary); cursor: pointer; display: flex; align-items: center; padding: 2px; }
     
     .search-box-wrapper { padding: 0 16px 10px 16px; }
-    .search-input-container { display: flex; align-items: center; background-color: #ffffff; border: 1px solid #ffffff; border-radius: 8px; padding: 9px 14px; }
-    .search-input-container input { border: none; outline: none; width: 100%; font-size: 14px; font-weight: 400; color: #1e293b; background: transparent; }
-    .search-input-container input::placeholder { color: #64748b; }
-    .search-icon { color: #64748b; display: flex; align-items: center; }
-    .search-icon svg { stroke: #64748b !important; }
+    .search-input-container { display: flex; align-items: center; background-color: #ffffff; border: 1px solid #d0d0d0; border-radius: 6px; padding: 8px 12px; }
+    .search-input-container input { border: none; outline: none; width: 100%; font-size: 14px; font-weight: 400; color: var(--cb-text-dark); background: transparent; }
+    .search-icon { color: #666666; display: flex; align-items: center; }
 
-    .cep-delivery-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px 10px 16px; background-color: #000000; border: none; font-size: 14px; color: #ffffff; font-weight: 500; cursor: pointer; user-select: none; }
-    .cep-left-info { display: flex; align-items: center; gap: 10px; color: #ffffff; }
-    .cep-left-info svg { stroke: #ffffff !important; }
+    .cep-delivery-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background-color: transparent; border: none; font-size: 14px; color: var(--cb-blue-primary); font-weight: 500; cursor: pointer; user-select: none; }
+    .cep-left-info { display: flex; align-items: center; gap: 10px; }
     .cep-text-container { display: flex; flex-direction: column; }
-    .cep-label-only { font-size: 14px; color: #ffffff; font-weight: 500; }
-    .cep-label-top { font-size: 12px; color: #cbd5e1; font-weight: 400; line-height: 1.2; }
-    .cep-value-bottom { font-size: 14px; color: #ffffff; font-weight: 700; line-height: 1.2; }
-    .cep-accessibility-icon svg { stroke: #ffffff !important; }
-    .cep-accessibility-icon svg circle:nth-child(2) { fill: #ffffff !important; }
+    .cep-label-only { font-size: 14px; color: var(--cb-blue-primary); font-weight: 500; }
+    .cep-label-top { font-size: 12px; color: var(--cb-blue-primary); font-weight: 400; line-height: 1.2; }
+    .cep-value-bottom { font-size: 14px; color: var(--cb-blue-primary); font-weight: 700; line-height: 1.2; }
 
     /* ESTILOS DO MENU HAMBÚRGUER LATERAL (FULL SCREEN 100%) */
     .nav-drawer-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: #ffffff; display: none; z-index: 3000; }
@@ -215,7 +208,7 @@ try {
     .category-scroll-container { display: flex; gap: 16px; overflow-x: auto; padding: 18px 16px; background-color: #ffffff; scrollbar-width: none; }
     .category-scroll-container::-webkit-scrollbar { display: none; }
     .cat-item-card { display: flex; flex-direction: column; align-items: center; min-width: 86px; text-align: center; cursor: pointer; flex-shrink: 0; }
-    .cat-icon-circle { width: 86px; height: 86px; border-radius: 26px; background: #0a0a0a; border: none; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.09); flex-shrink: 0; }
+    .cat-icon-circle { width: 86px; height: 86px; border-radius: 26px; background: transparent; border: none; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.09); flex-shrink: 0; }
     .cat-icon-circle img, .cat-icon-circle video { width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 26px !important; border: none !important; outline: none !important; display: block !important; transform: scale(1.05); }
     .cat-label { font-size: 12.5px; font-weight: 500; color: #003399; line-height: 1.25; text-align: center; white-space: nowrap; letter-spacing: -0.2px; }
 
@@ -455,7 +448,7 @@ try {
       <div class="header-left-group">
         <!-- BOTÃO ÍCONE HAMBÚRGUER (≡ OU ||| DEITADOS) COM MESMO CLIQUE DO INDEX -->
         <button class="header-icon-btn" aria-label="Menu" onclick="openNavDrawer()">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
         </button>
         
         <a href="home.php" class="brand-logo">
@@ -465,16 +458,16 @@ try {
 
       <div class="header-actions">
         <button class="header-icon-btn" aria-label="Perfil" onclick="handleUserHeaderClick()">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </button>
         <div class="fav-header-wrap">
           <button class="header-icon-btn" aria-label="Favoritos" onclick="openFavModal()">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           </button>
           <span class="fav-count-badge" id="favBadge"></span>
         </div>
         <button class="header-icon-btn" aria-label="Carrinho" onclick="window.location.href='carrinho.php?empty=1'">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
         </button>
       </div>
     </div>
@@ -500,9 +493,9 @@ try {
 
       <!-- Ícone de Acessibilidade Oficial -->
       <div class="cep-accessibility-icon" title="Acessibilidade">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5">
           <circle cx="12" cy="12" r="10"/>
-          <circle cx="12" cy="6.5" r="1.5" fill="#ffffff" stroke="none"/>
+          <circle cx="12" cy="6.5" r="1.5" fill="#003399" stroke="none"/>
           <path d="M7 10.5h10M12 10.5v5M9.5 19.5l2.5-4 2.5 4" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>

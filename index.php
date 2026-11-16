@@ -403,31 +403,24 @@ $product['discount_percentage'] = $realPercent;
     .top-red-line { height: 3px; background-color: #e30613; width: 100%; }
 
     /* CABEÇALHO COM LOGOTIPO LOGO APÓS O ÍCONE ≡ */
-    .main-header { background-color: #000000; border-bottom: 1px solid #111111; position: relative; z-index: 10; }
+    .main-header { background-color: transparent; border-bottom: none; position: relative; z-index: 10; }
     .header-top-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; }
     .header-left-group { display: flex; align-items: center; gap: 8px; }
-    .brand-logo { font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; line-height: 1; display: flex; align-items: center; text-decoration: none; }
-    .brand-logo span { color: #ffffff; }
+    .brand-logo { font-size: 20px; font-weight: 800; color: var(--cb-blue-primary); letter-spacing: -0.5px; line-height: 1; }
+    .brand-logo span { color: var(--cb-red); }
     .header-actions { display: flex; gap: 14px; align-items: center; }
-    .header-icon-btn { background: none; border: none; color: #ffffff; cursor: pointer; display: flex; align-items: center; padding: 2px; }
-    .header-icon-btn svg { stroke: #ffffff !important; }
+    .header-icon-btn { background: none; border: none; color: var(--cb-blue-primary); cursor: pointer; display: flex; align-items: center; padding: 2px; }
     
     .search-box-wrapper { padding: 0 16px 10px 16px; }
-    .search-input-container { display: flex; align-items: center; background-color: #ffffff; border: 1px solid #ffffff; border-radius: 8px; padding: 9px 14px; }
-    .search-input-container input { border: none; outline: none; width: 100%; font-size: 14px; font-weight: 400; color: #1e293b; background: transparent; }
-    .search-input-container input::placeholder { color: #64748b; }
-    .search-icon { color: #64748b; display: flex; align-items: center; }
-    .search-icon svg { stroke: #64748b !important; }
+    .search-input-container { display: flex; align-items: center; background-color: #ffffff; border: 1px solid #d0d0d0; border-radius: 6px; padding: 8px 12px; }
+    .search-input-container input { border: none; outline: none; width: 100%; font-size: 14px; font-weight: 400; color: var(--cb-text-dark); }
     
-    .cep-delivery-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px 10px 16px; background-color: #000000; border: none; font-size: 14px; color: #ffffff; font-weight: 500; cursor: pointer; user-select: none; }
-    .cep-left-info { display: flex; align-items: center; gap: 10px; color: #ffffff; }
-    .cep-left-info svg { stroke: #ffffff !important; }
+    .cep-delivery-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background-color: transparent; border: none; font-size: 14px; color: var(--cb-blue-primary); font-weight: 500; cursor: pointer; user-select: none; }
+    .cep-left-info { display: flex; align-items: center; gap: 10px; }
     .cep-text-container { display: flex; flex-direction: column; }
-    .cep-label-only { font-size: 14px; color: #ffffff; font-weight: 500; }
-    .cep-label-top { font-size: 12px; color: #cbd5e1; font-weight: 400; line-height: 1.2; }
-    .cep-value-bottom { font-size: 14px; color: #ffffff; font-weight: 700; line-height: 1.2; }
-    .cep-accessibility-icon svg { stroke: #ffffff !important; }
-    .cep-accessibility-icon svg circle:nth-child(2) { fill: #ffffff !important; }
+    .cep-label-only { font-size: 14px; color: var(--cb-blue-primary); font-weight: 500; }
+    .cep-label-top { font-size: 12px; color: var(--cb-blue-primary); font-weight: 400; line-height: 1.2; }
+    .cep-value-bottom { font-size: 14px; color: var(--cb-blue-primary); font-weight: 700; line-height: 1.2; }
 
     /* ESTILOS DO MENU HAMBÚRGUER LATERAL (FULL SCREEN 100%) */
     .nav-drawer-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: #ffffff; display: none; z-index: 3000; }
@@ -1239,7 +1232,7 @@ $product['discount_percentage'] = $realPercent;
     <div class="header-top-row">
       <div class="header-left-group">
         <button class="header-icon-btn" onclick="openNavDrawer()" aria-label="Menu">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
         </button>
         
         <a href="home.php" class="brand-logo">
@@ -1249,16 +1242,16 @@ $product['discount_percentage'] = $realPercent;
 
       <div class="header-actions">
         <button class="header-icon-btn" aria-label="Perfil" onclick="handleUserHeaderClick()">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </button>
         <div class="fav-header-wrap">
           <button class="header-icon-btn" aria-label="Favoritos" onclick="openFavModal()">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           </button>
           <span class="fav-count-badge" id="favBadge"></span>
         </div>
         <button class="header-icon-btn" aria-label="Carrinho" onclick="window.location.href='carrinho.php?empty=1'">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
         </button>
       </div>
     </div>
@@ -1276,7 +1269,7 @@ $product['discount_percentage'] = $realPercent;
     <!-- CEP Locator Bar -->
     <div class="cep-delivery-bar" id="cepBarToggle" onclick="openCepModal()">
       <div class="cep-left-info">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
         <div class="cep-text-container" id="cepTextContainer">
           <span class="cep-label-only">Informe seu CEP</span>
         </div>
@@ -1284,9 +1277,9 @@ $product['discount_percentage'] = $realPercent;
 
       <!-- Ícone de Acessibilidade Oficial -->
       <div class="cep-accessibility-icon" title="Acessibilidade">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5">
           <circle cx="12" cy="12" r="10"/>
-          <circle cx="12" cy="6.5" r="1.5" fill="#ffffff" stroke="none"/>
+          <circle cx="12" cy="6.5" r="1.5" fill="#003399" stroke="none"/>
           <path d="M7 10.5h10M12 10.5v5M9.5 19.5l2.5-4 2.5 4" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>

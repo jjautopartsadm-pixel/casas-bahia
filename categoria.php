@@ -183,27 +183,24 @@ if (empty($filteredProducts)) {
     .top-red-line { height: 4px; background-color: var(--cb-red); width: 100%; }
 
     /* CABEÇALHO DA CASAS BAHIA */
-    .main-header { background-color: #000000; border-bottom: 1px solid #111111; position: relative; z-index: 10; }
+    .main-header { background-color: #ffffff; border-bottom: 1px solid var(--cb-gray-border); position: relative; z-index: 10; }
     .header-top-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; }
     .header-left-group { display: flex; align-items: center; gap: 8px; }
-    .brand-logo { font-size: 20px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; line-height: 1; display: flex; align-items: center; text-decoration: none; }
-    .brand-logo span { color: #ffffff; }
+    .brand-logo { font-size: 20px; font-weight: 800; color: var(--cb-blue-primary); letter-spacing: -0.5px; line-height: 1; display: flex; align-items: center; }
+    .brand-logo span { color: var(--cb-red); }
     .header-actions { display: flex; gap: 14px; align-items: center; }
-    .header-icon-btn { background: none; border: none; color: #ffffff; cursor: pointer; display: flex; align-items: center; padding: 2px; }
-    .header-icon-btn svg { stroke: #ffffff !important; }
+    .header-icon-btn { background: none; border: none; color: var(--cb-blue-primary); cursor: pointer; display: flex; align-items: center; padding: 2px; }
 
     .search-box-wrapper { padding: 0 16px 10px 16px; }
-    .search-input-container { display: flex; align-items: center; background-color: #ffffff; border: 1px solid #ffffff; border-radius: 8px; padding: 9px 14px; }
-    .search-input-container input { border: none; outline: none; width: 100%; font-size: 14px; font-weight: 400; color: #1e293b; background: transparent; }
-    .search-input-container input::placeholder { color: #64748b; }
-    .search-icon { color: #64748b; display: flex; align-items: center; }
-    .search-icon svg { stroke: #64748b !important; }
+    .search-input-container { display: flex; align-items: center; background-color: #ffffff; border: 1px solid #d0d0d0; border-radius: 6px; padding: 8px 12px; }
+    .search-input-container input { border: none; outline: none; width: 100%; font-size: 14px; font-weight: 400; color: var(--cb-text-dark); background: transparent; }
+    .search-icon { color: var(--cb-blue-primary); display: flex; align-items: center; }
 
     /* NAVEGAÇÃO ENTRE CATEGORIAS (CARROSSEL COM ÍCONES) */
     .category-scroll-container { display: flex; gap: 16px; overflow-x: auto; padding: 18px 16px; background-color: #ffffff; border-bottom: 1px solid #eeeeee; scrollbar-width: none; }
     .category-scroll-container::-webkit-scrollbar { display: none; }
     .cat-item-card { display: flex; flex-direction: column; align-items: center; min-width: 86px; text-align: center; cursor: pointer; text-decoration: none; color: inherit; flex-shrink: 0; }
-    .cat-icon-circle { width: 86px; height: 86px; border-radius: 26px; background: #0a0a0a; border: none; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.09); flex-shrink: 0; transition: transform 0.2s, box-shadow 0.2s; }
+    .cat-icon-circle { width: 86px; height: 86px; border-radius: 26px; background: transparent; border: none; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.09); flex-shrink: 0; transition: transform 0.2s, box-shadow 0.2s; }
     .cat-item-card.active .cat-icon-circle { box-shadow: 0 4px 14px rgba(0, 51, 153, 0.4); transform: scale(1.05); }
     .cat-icon-circle img, .cat-icon-circle video { width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 26px !important; border: none !important; outline: none !important; display: block !important; transform: scale(1.05); }
     .cat-label { font-size: 12.5px; font-weight: 500; color: #003399; line-height: 1.25; text-align: center; white-space: nowrap; letter-spacing: -0.2px; }
@@ -250,7 +247,7 @@ if (empty($filteredProducts)) {
     <div class="header-top-row">
       <div class="header-left-group">
         <a href="home.php" class="header-icon-btn" aria-label="Voltar para a Home">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
         </a>
         
         <a href="home.php" class="brand-logo">
@@ -260,7 +257,7 @@ if (empty($filteredProducts)) {
 
       <div class="header-actions">
         <button class="header-icon-btn" onclick="window.location.href='carrinho.php?empty=1'" aria-label="Carrinho">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
         </button>
       </div>
     </div>

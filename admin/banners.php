@@ -238,8 +238,8 @@ try {
     .banners-table th:nth-child(4) { width: 110px; text-align: center; }
     .banners-table td { padding: 14px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; word-wrap: break-word; overflow-wrap: break-word; }
     
-    .banner-thumb { width: 160px; height: 70px; border-radius: 8px; object-fit: cover; border: 1px solid #e2e8f0; display: block; background: #000000; }
-    .cat-thumb { width: 54px; height: 54px; border-radius: 16px; object-fit: cover; background: #0a0a0a; }
+    .banner-thumb { width: 160px; height: 70px; border-radius: 8px; object-fit: cover; border: 1px solid #e2e8f0; display: block; }
+    .cat-thumb { width: 54px; height: 54px; border-radius: 16px; object-fit: cover; background: #003399; }
     
     .btn-del { background: #ef4444; color: #ffffff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 800; font-size: 12px; cursor: pointer; }
     .btn-del:hover { background: #dc2626; }

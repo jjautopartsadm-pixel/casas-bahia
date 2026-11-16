@@ -222,7 +222,7 @@ try {
     .form-control:focus { border-color: var(--primary); }
     .btn-submit { background: var(--primary); color: #ffffff; font-size: 15px; font-weight: 800; padding: 14px 24px; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 51, 153, 0.2); }
     .btn-submit:hover { background: #002266; }
-    .cat-thumb { width: 54px; height: 54px; border-radius: 16px; object-fit: cover; background: #0a0a0a; }
+    .cat-thumb { width: 54px; height: 54px; border-radius: 16px; object-fit: cover; background: #003399; }
     .cat-grid-admin { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; margin-top: 14px; }
     .cat-card-item { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 18px; position: relative; }
     .cat-card-header { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
