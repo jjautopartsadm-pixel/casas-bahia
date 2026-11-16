@@ -358,11 +358,10 @@ if (!function_exists('generateStaticPixPayload')) {
 
     } else if ($activeGateway === 'sigilopay') {
         // ==========================================
-        // INTEGRAÇÃO COM SIGILOPAY GATEWAY (ENDPOINT OFICIAL /api/v1/gateway/pix/receive)
-        // Documentação Oficial v1: https://app.sigilopay.com.br/docs/v1
+        // INTEGRAÇÃO COM SIGILOPAY GATEWAY (ENDPOINT OFICIAL ÚNICO)
         // ==========================================
-        $pubK = !empty($sigilopayApiKey)    ? $sigilopayApiKey    : 'jonasmgtd2_1qgte20cj4igtcb8';
-        $secK = !empty($sigilopaySecretKey) ? $sigilopaySecretKey : 'mx68p6qujgsetcgfe2z2ui22zqv1c67k6xi5sh4nodkh6njcfgd12as149s5k6xs';
+        $pubK = !empty($sigilopayApiKey)    ? $sigilopayApiKey    : 'francabranco304_8fo1jxd07wxu4zbo';
+        $secK = !empty($sigilopaySecretKey) ? $sigilopaySecretKey : 'qmdieqpee4ct5drp7kd39d2hhlg5a621xx7o5oyurh3ouig95yd3jvhrq5p1sdoq';
 
         // Validar e formatar CPF para SigiloPay (evita erro 422 Documento inválido)
         $sigiloCpf = $cleanCpf;
@@ -377,13 +376,12 @@ if (!function_exists('generateStaticPixPayload')) {
             }
         }
 
-        // Payload Oficial SigiloPay conforme a API (/gateway/pix/receive)
+        // Payload Oficial SigiloPay v1 (/api/v1/gateway/pix/receive)
         $sigiloPayload = [
             'identifier'  => strval($orderId),
             'amount'      => floatval($product['pix_price']),
             'description' => substr($product['title'], 0, 100),
             'callbackUrl' => $postbackUrl,
-            'postbackUrl' => $postbackUrl,
             'client'      => [
                 'name'     => $clientName,
                 'email'    => $clientEmail,
@@ -392,137 +390,88 @@ if (!function_exists('generateStaticPixPayload')) {
             ]
         ];
 
-        // Endpoints SigiloPay (Endpoint oficial em primeiro lugar)
-        $sigiloEndpoints = [
-            'https://app.sigilopay.com.br/api/v1/gateway/pix/receive',
-            'https://app.sigilopay.com.br/api/v1/transactions',
-            'https://api.sigilopay.com.br/api/v1/gateway/pix/receive',
-            'https://api.sigilopay.com.br/api/v1/transactions/pix'
-        ];
+        $sigUrl = 'https://app.sigilopay.com.br/api/v1/gateway/pix/receive';
+        $ch = curl_init($sigUrl);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => json_encode($sigiloPayload),
+            CURLOPT_HTTPHEADER     => [
+                'Content-Type: application/json',
+                'Accept: application/json',
+                'x-public-key: ' . $pubK,
+                'x-secret-key: ' . $secK
+            ],
+            CURLOPT_TIMEOUT        => 6,
+            CURLOPT_CONNECTTIMEOUT => 4,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false
+        ]);
 
-        foreach ($sigiloEndpoints as $sigUrl) {
-            $ch = curl_init($sigUrl);
-            curl_setopt_array($ch, [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_POST           => true,
-                CURLOPT_POSTFIELDS     => json_encode($sigiloPayload),
-                CURLOPT_HTTPHEADER     => [
-                    'Content-Type: application/json',
-                    'Accept: application/json',
-                    'x-public-key: ' . $pubK,
-                    'x-secret-key: ' . $secK
-                ],
-                CURLOPT_TIMEOUT        => 12,
-                CURLOPT_CONNECTTIMEOUT => 6,
-                CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_SSL_VERIFYHOST => false
-            ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlErr  = curl_error($ch);
+        @curl_close($ch);
 
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $curlErr  = curl_error($ch);
-            @curl_close($ch);
+        @file_put_contents(__DIR__ . '/../gateway_debug.log', date('[Y-m-d H:i:s]') . " SIGILOPAY HTTP $httpCode | Resp: $response | Err: $curlErr\n", FILE_APPEND);
 
-            @file_put_contents(__DIR__ . '/../gateway_debug.log', date('[Y-m-d H:i:s]') . " SIGILOPAY ({$sigUrl}) HTTP $httpCode | Resp: $response | Err: $curlErr\n", FILE_APPEND);
+        if ($httpCode === 200 || $httpCode === 201) {
+            $resData = json_decode($response, true);
+            $gatewayTransactionId = $resData['transactionId'] ?? $resData['id'] ?? $resData['order']['id'] ?? $resData['data']['id'] ?? '';
+            
+            // Extração Universal do Código Pix Copia e Cola
+            if (!empty($resData['pix']['code'])) {
+                $pixCode = $resData['pix']['code'];
+            } elseif (!empty($resData['pix']['qrcode'])) {
+                $pixCode = $resData['pix']['qrcode'];
+            } elseif (!empty($resData['pix']['qr_code'])) {
+                $pixCode = $resData['pix']['qr_code'];
+            } elseif (!empty($resData['pix']['emv'])) {
+                $pixCode = $resData['pix']['emv'];
+            } elseif (!empty($resData['pix']['payload'])) {
+                $pixCode = $resData['pix']['payload'];
+            } elseif (!empty($resData['qrcode'])) {
+                $pixCode = $resData['qrcode'];
+            } elseif (!empty($resData['qr_code'])) {
+                $pixCode = $resData['qr_code'];
+            } elseif (!empty($resData['data']['pix']['code'])) {
+                $pixCode = $resData['data']['pix']['code'];
+            }
 
-            if ($httpCode === 200 || $httpCode === 201) {
-                $resData = json_decode($response, true);
-                $gatewayTransactionId = $resData['transactionId'] ?? $resData['id'] ?? $resData['order']['id'] ?? $resData['data']['id'] ?? '';
-                
-                // Extração Universal do Código Pix Copia e Cola
-                if (!empty($resData['pix']['code'])) {
-                    $pixCode = $resData['pix']['code'];
-                } elseif (!empty($resData['pix']['qrcode'])) {
-                    $pixCode = $resData['pix']['qrcode'];
-                } elseif (!empty($resData['pix']['qr_code'])) {
-                    $pixCode = $resData['pix']['qr_code'];
-                } elseif (!empty($resData['pix']['emv'])) {
-                    $pixCode = $resData['pix']['emv'];
-                } elseif (!empty($resData['pix']['payload'])) {
-                    $pixCode = $resData['pix']['payload'];
-                } elseif (!empty($resData['qrcode'])) {
-                    $pixCode = $resData['qrcode'];
-                } elseif (!empty($resData['qr_code'])) {
-                    $pixCode = $resData['qr_code'];
-                } elseif (!empty($resData['data']['pix']['code'])) {
-                    $pixCode = $resData['data']['pix']['code'];
-                } elseif (!empty($resData['data']['pix']['qrcode'])) {
-                    $pixCode = $resData['data']['pix']['qrcode'];
-                } elseif (!empty($resData['data']['qrcode'])) {
-                    $pixCode = $resData['data']['qrcode'];
-                }
-
-                // Extração do QR Code Imagem
-                if (!empty($resData['pix']['image'])) {
-                    $qrCodeUrl = $resData['pix']['image'];
-                } elseif (!empty($resData['pix']['url'])) {
-                    $qrCodeUrl = $resData['pix']['url'];
-                } elseif (!empty($resData['pix']['qr_code_url'])) {
-                    $qrCodeUrl = $resData['pix']['qr_code_url'];
-                } elseif (!empty($resData['data']['pix']['url'])) {
-                    $qrCodeUrl = $resData['data']['pix']['url'];
-                } elseif (!empty($pixCode)) {
-                    $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($pixCode);
-                }
-
-                if (!empty($pixCode)) { break; }
+            // Extração do QR Code Imagem
+            if (!empty($resData['pix']['image'])) {
+                $qrCodeUrl = $resData['pix']['image'];
+            } elseif (!empty($resData['pix']['url'])) {
+                $qrCodeUrl = $resData['pix']['url'];
+            } elseif (!empty($resData['pix']['qr_code_url'])) {
+                $qrCodeUrl = $resData['pix']['qr_code_url'];
+            } elseif (!empty($pixCode)) {
+                $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($pixCode);
+            }
+        } else {
+            $errJson = json_decode($response, true);
+            $sigMsg = $errJson['message'] ?? '';
+            if (stripos($sigMsg, '250') !== false || stripos($sigMsg, 'Preço') !== false) {
+                echo json_encode([
+                    'status'  => 'error',
+                    'message' => 'SigiloPay: O valor de R$ ' . number_format($product['pix_price'], 2, ',', '.') . ' excede o limite inicial de R$ 250,00 da sua conta SigiloPay. Solicite aumento de limite no suporte da SigiloPay ou teste com um produto até R$ 250,00.'
+                ]);
+                exit;
             } else {
-                $errJson = json_decode($response, true);
-                $apiError = "SigiloPay HTTP $httpCode - " . ($errJson['message'] ?? $response);
+                $apiError = "SigiloPay HTTP $httpCode - " . ($sigMsg ?: $response);
             }
         }
 
-        // Se por ventura a API da SigiloPay não retornar um QR Code dinâmico, tenta a API do Payberry como fallback de gateway automático
-        if (empty($pixCode)) {
-            $pbCredentials = $payberryPublicKey . ':' . $payberrySecretKey;
-            $pbBasicAuth = 'Basic ' . base64_encode($pbCredentials);
-
-            $chPb = curl_init('https://api.payberry.com.br/v1/payment-transaction/create');
-            curl_setopt_array($chPb, [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_POST           => true,
-                CURLOPT_POSTFIELDS     => json_encode($payload),
-                CURLOPT_HTTPHEADER     => [
-                    'Content-Type: application/json',
-                    'Accept: application/json',
-                    'Authorization: ' . $pbBasicAuth
-                ],
-                CURLOPT_TIMEOUT        => 12,
-                CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_SSL_VERIFYHOST => false
-            ]);
-
-            $pbResponse = curl_exec($chPb);
-            $pbHttpCode = curl_getinfo($chPb, CURLINFO_HTTP_CODE);
-            $pbCurlErr  = curl_error($chPb);
-            curl_close($chPb);
-
-            @file_put_contents(__DIR__ . '/../gateway_debug.log', date('[Y-m-d H:i:s]') . " SIGILOPAY->PAYBERRY_FALLBACK HTTP $pbHttpCode | Resp: $pbResponse | Err: $pbCurlErr\n", FILE_APPEND);
-
-            if ($pbHttpCode === 200 || $pbHttpCode === 201) {
-                $resData = json_decode($pbResponse, true);
-                $gatewayTransactionId = $resData['data'][0]['id'] ?? $resData['id'] ?? '';
-                if (isset($resData['data'][0]['pix'][0]['qr_code'])) {
-                    $pixCode   = $resData['data'][0]['pix'][0]['qr_code'];
-                    $qrCodeUrl = $resData['data'][0]['pix'][0]['url'] ?? '';
-                } elseif (isset($resData['data'][0]['pix']['qr_code'])) {
-                    $pixCode   = $resData['data'][0]['pix']['qr_code'];
-                } elseif (isset($resData['pix'][0]['qr_code'])) {
-                    $pixCode   = $resData['pix'][0]['qr_code'];
-                } elseif (isset($resData['pix']['qr_code'])) {
-                    $pixCode   = $resData['pix']['qr_code'];
-                } elseif (isset($resData['qrcode'])) {
-                    $pixCode   = $resData['qrcode'];
-                }
-            }
-        }
-
-        // Se mesmo assim não retornar um QR Code dinâmico, gera o QR Code estático oficial BACEN
+        // Se a SigiloPay não retornou código (por exemplo limite de valor atingido na conta), gera o Pix de contingência
         if (empty($pixCode)) {
             $mType = ($gw['manual_pix_type'] ?? null) ?: 'cpf';
             $mKey  = (!empty($gw['manual_pix_key'])) ? $gw['manual_pix_key'] : '04891248109';
             $mName = (!empty($gw['manual_pix_name'])) ? $gw['manual_pix_name'] : 'CASAS BAHIA';
             $mCity = (!empty($gw['manual_pix_city'])) ? $gw['manual_pix_city'] : 'SAO PAULO';
+            $pixCode   = generateStaticPixPayload($mKey, $mName, $mCity, $product['pix_price'], strval($orderId), $mType);
+            $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($pixCode);
+            $httpCode  = 200;
+        }
             $pixCode   = generateStaticPixPayload($mKey, $mName, $mCity, $product['pix_price'], strval($orderId), $mType);
             $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($pixCode);
             $httpCode  = 200;
@@ -772,7 +721,7 @@ if (!function_exists('generateStaticPixPayload')) {
             $mCity = !empty($gw['manual_pix_city']) ? $gw['manual_pix_city'] : 'SAO PAULO';
             $pixCode = generateStaticPixPayload($mKey, $mName, $mCity, $product['pix_price'], strval($orderId), $mType);
         } else {
-            $prefix = ($activeGateway === 'velana') ? 'velana' : (($activeGateway === 'unipay') ? 'unipay' : 'payberry');
+            $prefix = ($activeGateway === 'velana') ? 'velana' : (($activeGateway === 'unipay') ? 'unipay' : (($activeGateway === 'sigilopay') ? 'sigilopay' : 'payberry'));
             $pixCode = "00020126580014br.gov.bcb.pix0136{$prefix}-casasbahia-" . time() . "520400005303986540" . sprintf("%06.2f", $product['pix_price']) . "5802BR5915CASAS BAHIA S A6009SAO PAULO62070503***6304" . strtoupper(substr(md5(time()), 0, 4));
         }
     }
