@@ -248,8 +248,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'])) {
                             $newFilename = 'prod_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
                             $targetPath = $uploadDir . $newFilename;
-                            if (move_uploaded_file($tmpName, $targetPath)) {
+                            if (@move_uploaded_file($tmpName, $targetPath)) {
                                 $uploadedUrls[] = 'assets/images/uploads/' . $newFilename;
+                            } else {
+                                $fileData = @file_get_contents($tmpName);
+                                if ($fileData !== false && strlen($fileData) > 0) {
+                                    $mime = 'image/jpeg';
+                                    if (function_exists('mime_content_type')) {
+                                        $detected = @mime_content_type($tmpName);
+                                        if ($detected) $mime = $detected;
+                                    }
+                                    $uploadedUrls[] = 'data:' . $mime . ';base64,' . base64_encode($fileData);
+                                }
                             }
                         }
                     }

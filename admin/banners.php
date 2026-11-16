@@ -37,10 +37,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '', $_FILES['banner_file']['name']);
                     $targetPath = $uploadDir . $fileName;
 
-                    if (move_uploaded_file($fileTmp, $targetPath)) {
+                    if (@move_uploaded_file($fileTmp, $targetPath)) {
                         $imageUrl = 'assets/images/banners/' . $fileName;
                     } else {
-                        $error = "Não foi possível salvar o arquivo na pasta de destino. Verifique as permissões da pasta assets/images/banners/";
+                        // Ambiente Serverless (Vercel) com disco somente-leitura: armazena como Data URI Base64
+                        $fileData = @file_get_contents($fileTmp);
+                        if ($fileData !== false && strlen($fileData) > 0) {
+                            $mime = 'image/jpeg';
+                            if (function_exists('mime_content_type')) {
+                                $detected = @mime_content_type($fileTmp);
+                                if ($detected) $mime = $detected;
+                            }
+                            $imageUrl = 'data:' . $mime . ';base64,' . base64_encode($fileData);
+                        } else {
+                            $error = "Não foi possível salvar o arquivo na pasta de destino. Tente usar a URL direta da imagem/GIF.";
+                        }
                     }
                 } else if ($fileErr === UPLOAD_ERR_INI_SIZE || $fileErr === UPLOAD_ERR_FORM_SIZE) {
                     $error = "O arquivo do GIF/Imagem selecionado é muito grande para o servidor. Tente usar um arquivo menor ou cole o link direto (URL).";
@@ -91,10 +102,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $fileName = 'cat_' . time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '', $_FILES['cat_file']['name']);
                     $targetPath = $uploadDir . $fileName;
 
-                    if (move_uploaded_file($fileTmp, $targetPath)) {
+                    if (@move_uploaded_file($fileTmp, $targetPath)) {
                         $catUrl = 'assets/images/banners/' . $fileName;
                     } else {
-                        $error = "Não foi possível salvar o GIF na pasta de destino assets/images/banners/. Verifique as permissões.";
+                        // Ambiente Serverless (Vercel) com disco somente-leitura: armazena como Data URI Base64
+                        $fileData = @file_get_contents($fileTmp);
+                        if ($fileData !== false && strlen($fileData) > 0) {
+                            $mime = 'image/gif';
+                            if (function_exists('mime_content_type')) {
+                                $detected = @mime_content_type($fileTmp);
+                                if ($detected) $mime = $detected;
+                            }
+                            $catUrl = 'data:' . $mime . ';base64,' . base64_encode($fileData);
+                        } else {
+                            $error = "Não foi possível salvar o GIF na pasta de destino. Tente utilizar a URL direta do GIF.";
+                        }
                     }
                 } else if ($fileErr === UPLOAD_ERR_INI_SIZE || $fileErr === UPLOAD_ERR_FORM_SIZE) {
                     $error = "O arquivo do GIF é maior do que o limite de upload do servidor (" . ini_get('upload_max_filesize') . "). Cole o link (URL) do GIF ou use um arquivo menor.";

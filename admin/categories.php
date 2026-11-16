@@ -32,10 +32,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $fileName = 'cat_' . time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '', $_FILES['cat_file']['name']);
                 $targetPath = $uploadDir . $fileName;
 
-                if (move_uploaded_file($fileTmp, $targetPath)) {
+                if (@move_uploaded_file($fileTmp, $targetPath)) {
                     $imageUrl = 'assets/images/banners/' . $fileName;
                 } else {
-                    $error = "Não foi possível salvar o arquivo na pasta de destino.";
+                    $fileData = @file_get_contents($fileTmp);
+                    if ($fileData !== false && strlen($fileData) > 0) {
+                        $mime = 'image/gif';
+                        if (function_exists('mime_content_type')) {
+                            $detected = @mime_content_type($fileTmp);
+                            if ($detected) $mime = $detected;
+                        }
+                        $imageUrl = 'data:' . $mime . ';base64,' . base64_encode($fileData);
+                    } else {
+                        $error = "Não foi possível salvar o arquivo na pasta de destino.";
+                    }
                 }
             }
         }
@@ -77,8 +87,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $fileName = 'cat_' . time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '', $_FILES['cat_file']['name']);
                 $targetPath = $uploadDir . $fileName;
 
-                if (move_uploaded_file($fileTmp, $targetPath)) {
+                if (@move_uploaded_file($fileTmp, $targetPath)) {
                     $imageUrl = 'assets/images/banners/' . $fileName;
+                } else {
+                    $fileData = @file_get_contents($fileTmp);
+                    if ($fileData !== false && strlen($fileData) > 0) {
+                        $mime = 'image/gif';
+                        if (function_exists('mime_content_type')) {
+                            $detected = @mime_content_type($fileTmp);
+                            if ($detected) $mime = $detected;
+                        }
+                        $imageUrl = 'data:' . $mime . ';base64,' . base64_encode($fileData);
+                    }
                 }
             }
         }
