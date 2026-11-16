@@ -42,17 +42,21 @@ function getDBConnection() {
             }
         } catch (PDOException $e) {
             // Em ambiente local ou fallback sem MySQL remoto configurado, usa SQLite
-            $sqliteSource = realpath(__DIR__ . '/../database.sqlite');
-            $sqliteTmp = sys_get_temp_dir() . '/database.sqlite';
+            $sqliteSource = realpath(__DIR__ . '/../database.sqlite') ?: (__DIR__ . '/../database.sqlite');
+            $isServerless = (getenv('VERCEL') || getenv('NOW_REGION') || getenv('AWS_LAMBDA_FUNCTION_NAME') || !is_writable($sqliteSource));
             
-            // Em ambiente serverless (Vercel) copia para /tmp para ter permissão de leitura/escrita
-            if ($sqliteSource && file_exists($sqliteSource)) {
+            if ($isServerless) {
+                // Em ambiente serverless (Vercel com disco somente-leitura) copia para /tmp
+                $sqliteTmp = sys_get_temp_dir() . '/database.sqlite';
                 if (!file_exists($sqliteTmp) || filesize($sqliteTmp) === 0) {
-                    @copy($sqliteSource, $sqliteTmp);
+                    if (file_exists($sqliteSource)) {
+                        @copy($sqliteSource, $sqliteTmp);
+                    }
                 }
                 $sqlitePath = file_exists($sqliteTmp) ? $sqliteTmp : $sqliteSource;
             } else {
-                $sqlitePath = file_exists($sqliteTmp) ? $sqliteTmp : (__DIR__ . '/../database.sqlite');
+                // Ambiente Local (Windows/Linux): grava DIRETAMENTE no database.sqlite do projeto!
+                $sqlitePath = $sqliteSource;
             }
 
             try {
