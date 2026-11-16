@@ -206,34 +206,36 @@ function ensureExtraTablesExist($pdo, $driver = 'mysql') {
         try { $pdo->exec("ALTER TABLE gateway_settings ADD COLUMN unipay_secret_key TEXT"); } catch (Exception $e) {}
 
         // Inserir credenciais iniciais para Payberry, Velana, SigiloPay e UniPay SOMENTE se a linha id=1 ainda não existir
-        $insertIgnore = ($driver === 'sqlite') ? 'INSERT OR IGNORE' : 'INSERT IGNORE';
-        $pdo->exec("
-            $insertIgnore INTO gateway_settings (
-                id, gateway_name, active_gateway, api_key, secret_key, 
-                payberry_public_key, payberry_secret_key, 
-                velana_api_key, velana_secret_key, 
-                sigilopay_api_key, sigilopay_secret_key, 
-                unipay_public_key, unipay_secret_key,
-                pix_key, active_status
-            )
-            VALUES (
-                1, 
-                'UniPay BR Gateway', 
-                'unipay', 
-                'pk_7d6a530d3d7888de4a1e2de107a83c8834b6756f', 
-                'sk_aef383cb37d2fa8fab2445bc6ea012c88773893b', 
-                '', 
-                '', 
-                '', 
-                '', 
-                'francabranco304_8fo1jxd07wxu4zbo',
-                'qmdieqpee4ct5drp7kd39d2hhlg5a621xx7o5oyurh3ouig95yd3jvhrq5p1sdoq',
-                'pk_7d6a530d3d7888de4a1e2de107a83c8834b6756f',
-                'sk_aef383cb37d2fa8fab2445bc6ea012c88773893b', 
-                '', 
-                1
-            );
-        ");
+        $rowExists = $pdo->query("SELECT id FROM gateway_settings WHERE id = 1")->fetch();
+        if (!$rowExists) {
+            $pdo->exec("
+                INSERT INTO gateway_settings (
+                    id, gateway_name, active_gateway, api_key, secret_key, 
+                    payberry_public_key, payberry_secret_key, 
+                    velana_api_key, velana_secret_key, 
+                    sigilopay_api_key, sigilopay_secret_key, 
+                    unipay_public_key, unipay_secret_key,
+                    pix_key, active_status
+                )
+                VALUES (
+                    1, 
+                    'UniPay BR Gateway', 
+                    'unipay', 
+                    'pk_7d6a530d3d7888de4a1e2de107a83c8834b6756f', 
+                    'sk_aef383cb37d2fa8fab2445bc6ea012c88773893b', 
+                    '', 
+                    '', 
+                    '', 
+                    '', 
+                    'francabranco304_8fo1jxd07wxu4zbo',
+                    'qmdieqpee4ct5drp7kd39d2hhlg5a621xx7o5oyurh3ouig95yd3jvhrq5p1sdoq',
+                    'pk_7d6a530d3d7888de4a1e2de107a83c8834b6756f',
+                    'sk_aef383cb37d2fa8fab2445bc6ea012c88773893b', 
+                    '', 
+                    1
+                )
+            ");
+        }
 
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS site_activity (

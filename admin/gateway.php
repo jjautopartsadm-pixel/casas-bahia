@@ -39,54 +39,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $secretKey = ($activeGateway === 'velana') ? $velanaSecretKey : (($activeGateway === 'sigilopay') ? $sigilopaySecretKey : (($activeGateway === 'unipay') ? $unipaySecretKey : $payberrySecretKey));
 
     try {
-        $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
-        if ($driver === 'sqlite') {
-            $check = $db->query("SELECT id FROM gateway_settings WHERE id = 1")->fetch();
-            if ($check) {
-                $stmt = $db->prepare("
-                    UPDATE gateway_settings SET 
-                        gateway_name = :name, active_gateway = :agw, api_key = :api, secret_key = :secret,
-                        payberry_public_key = :ppub, payberry_secret_key = :psec,
-                        velana_api_key = :vapi, velana_secret_key = :vsec,
-                        sigilopay_api_key = :sapi, sigilopay_secret_key = :ssec,
-                        unipay_public_key = :upub, unipay_secret_key = :usec,
-                        pix_key = :pixk, manual_pix_type = :mtype, manual_pix_key = :mkey,
-                        manual_pix_name = :mname, manual_pix_city = :mcity, active_status = 1
-                    WHERE id = 1
-                ");
-            } else {
-                $stmt = $db->prepare("
-                    INSERT INTO gateway_settings 
-                        (id, gateway_name, active_gateway, api_key, secret_key, payberry_public_key, payberry_secret_key, velana_api_key, velana_secret_key, sigilopay_api_key, sigilopay_secret_key, unipay_public_key, unipay_secret_key, pix_key, manual_pix_type, manual_pix_key, manual_pix_name, manual_pix_city, active_status)
-                    VALUES 
-                        (1, :name, :agw, :api, :secret, :ppub, :psec, :vapi, :vsec, :sapi, :ssec, :upub, :usec, :pixk, :mtype, :mkey, :mname, :mcity, 1)
-                ");
-            }
+        $check = $db->query("SELECT id FROM gateway_settings WHERE id = 1")->fetch();
+        if ($check) {
+            $stmt = $db->prepare("
+                UPDATE gateway_settings SET 
+                    gateway_name = :name, active_gateway = :agw, api_key = :api, secret_key = :secret,
+                    payberry_public_key = :ppub, payberry_secret_key = :psec,
+                    velana_api_key = :vapi, velana_secret_key = :vsec,
+                    sigilopay_api_key = :sapi, sigilopay_secret_key = :ssec,
+                    unipay_public_key = :upub, unipay_secret_key = :usec,
+                    pix_key = :pixk, manual_pix_type = :mtype, manual_pix_key = :mkey,
+                    manual_pix_name = :mname, manual_pix_city = :mcity, active_status = 1
+                WHERE id = 1
+            ");
         } else {
             $stmt = $db->prepare("
                 INSERT INTO gateway_settings 
                     (id, gateway_name, active_gateway, api_key, secret_key, payberry_public_key, payberry_secret_key, velana_api_key, velana_secret_key, sigilopay_api_key, sigilopay_secret_key, unipay_public_key, unipay_secret_key, pix_key, manual_pix_type, manual_pix_key, manual_pix_name, manual_pix_city, active_status)
                 VALUES 
                     (1, :name, :agw, :api, :secret, :ppub, :psec, :vapi, :vsec, :sapi, :ssec, :upub, :usec, :pixk, :mtype, :mkey, :mname, :mcity, 1)
-                ON DUPLICATE KEY UPDATE 
-                    gateway_name = VALUES(gateway_name),
-                    active_gateway = VALUES(active_gateway),
-                    api_key = VALUES(api_key),
-                    secret_key = VALUES(secret_key),
-                    payberry_public_key = VALUES(payberry_public_key),
-                    payberry_secret_key = VALUES(payberry_secret_key),
-                    velana_api_key = VALUES(velana_api_key),
-                    velana_secret_key = VALUES(velana_secret_key),
-                    sigilopay_api_key = VALUES(sigilopay_api_key),
-                    sigilopay_secret_key = VALUES(sigilopay_secret_key),
-                    unipay_public_key = VALUES(unipay_public_key),
-                    unipay_secret_key = VALUES(unipay_secret_key),
-                    pix_key = VALUES(pix_key),
-                    manual_pix_type = VALUES(manual_pix_type),
-                    manual_pix_key = VALUES(manual_pix_key),
-                    manual_pix_name = VALUES(manual_pix_name),
-                    manual_pix_city = VALUES(manual_pix_city),
-                    active_status = 1
             ");
         }
         $stmt->execute([

@@ -490,10 +490,11 @@ if (!function_exists('generateStaticPixPayload')) {
         }
 
         $docType = (strlen($unipayCpf) > 11) ? 'CNPJ' : 'CPF';
+        $unipayPostbackUrl = $postbackUrl . (strpos($postbackUrl, '?') !== false ? '&' : '?') . 'order_id=' . strval($orderId);
 
-        // Payload Oficial UniPay BR / FastSoft
+        // Payload Oficial UniPay BR / FastSoft (sem campos não permitidos como externalRef/metadata na raiz)
         $unipayPayload = [
-            'amount'        => $priceInCents, // Valor em centavos (ex: 158007)
+            'amount'        => $priceInCents, // Valor em centavos (ex: 5900 = R$ 59,00)
             'currency'      => 'BRL',
             'paymentMethod' => 'PIX',
             'pix'           => [
@@ -510,17 +511,13 @@ if (!function_exists('generateStaticPixPayload')) {
             ],
             'items'         => [
                 [
-                    'title'       => substr($product['title'], 0, 120),
-                    'unitPrice'   => $priceInCents,
-                    'quantity'    => 1,
-                    'tangible'    => true,
-                    'externalRef' => 'item_' . $product['id']
+                    'title'     => substr($product['title'], 0, 120),
+                    'unitPrice' => $priceInCents,
+                    'quantity'  => 1,
+                    'tangible'  => true
                 ]
             ],
-            'postbackUrl'   => $postbackUrl,
-            'metadata'      => json_encode(['order_id' => strval($orderId)]),
-            'externalRef'   => strval($orderId),
-            'traceable'     => true
+            'postbackUrl'   => $unipayPostbackUrl
         ];
 
         // Endpoints UniPay (Domínio oficial UniPay e fallback FastSoft)
