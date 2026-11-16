@@ -92,8 +92,8 @@ try {
     $siteHost = $_SERVER['HTTP_HOST'] ?? 'meucarrinho.online';
     $baseUrl = $protocol . $siteHost;
     $homeOgImage = $baseUrl . '/assets/images/casasbahia_home_share.jpg';
-    $pageOgTitle = "Casas Bahia: Ofertas de TV, Celulares, Eletrodomésticos e Móveis";
-    $pageOgDesc = "Aproveite as melhores ofertas com frete grátis e desconto exclusivo no Pix nas Casas Bahia. Compre agora!";
+    $pageOgTitle = "Casas Bahia: Black Friday - As Melhores Ofertas";
+    $pageOgDesc = "Aproveite as melhores ofertas da Black Friday com frete grátis e desconto exclusivo no Pix nas Casas Bahia!";
     $pageOgUrl = $baseUrl . '/home.php';
   ?>
   <meta property="og:type" content="website">
@@ -103,9 +103,10 @@ try {
   <meta property="og:image" content="<?= htmlspecialchars($homeOgImage) ?>">
   <meta property="og:image:secure_url" content="<?= htmlspecialchars($homeOgImage) ?>">
   <meta property="og:image:type" content="image/jpeg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  <meta property="og:image:width" content="783">
+  <meta property="og:image:height" content="392">
   <meta property="og:url" content="<?= htmlspecialchars($pageOgUrl) ?>">
+  <link rel="image_src" href="<?= htmlspecialchars($homeOgImage) ?>">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="<?= htmlspecialchars($pageOgTitle) ?>">
   <meta name="twitter:description" content="<?= htmlspecialchars($pageOgDesc) ?>">
