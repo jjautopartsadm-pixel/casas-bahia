@@ -199,7 +199,7 @@ if (empty($filteredProducts)) {
     .category-scroll-container { display: flex; gap: 16px; overflow-x: auto; padding: 18px 16px; background-color: #ffffff; border-bottom: 1px solid #eeeeee; scrollbar-width: none; }
     .category-scroll-container::-webkit-scrollbar { display: none; }
     .cat-item-card { display: flex; flex-direction: column; align-items: center; min-width: 86px; text-align: center; cursor: pointer; text-decoration: none; color: inherit; flex-shrink: 0; }
-    .cat-icon-circle { width: 86px; height: 86px; border-radius: 26px; background: transparent; border: none; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.09); flex-shrink: 0; transition: transform 0.2s, box-shadow 0.2s; }
+    .cat-icon-circle { width: 86px; height: 86px; border-radius: 26px; background: #0a0a0a; border: none; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.09); flex-shrink: 0; transition: transform 0.2s, box-shadow 0.2s; }
     .cat-item-card.active .cat-icon-circle { box-shadow: 0 4px 14px rgba(0, 51, 153, 0.4); transform: scale(1.05); }
     .cat-icon-circle img, .cat-icon-circle video { width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 26px !important; border: none !important; outline: none !important; display: block !important; transform: scale(1.05); }
     .cat-label { font-size: 12.5px; font-weight: 500; color: #003399; line-height: 1.25; text-align: center; white-space: nowrap; letter-spacing: -0.2px; }
