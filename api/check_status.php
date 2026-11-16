@@ -192,15 +192,15 @@ try {
                 }
             }
         } else if ($activeGateway === 'sigilopay') {
-            // Consulta de status: GET https://api.sigilopay.com.br/api/v1/transactions/{id}
+            // Consulta de status oficial SigiloPay v1 (app.sigilopay.com.br/docs/v1)
             $pubK = !empty($sigilopayApiKey)    ? $sigilopayApiKey    : 'jonasmgtd2_1qgte20cj4igtcb8';
             $secK = !empty($sigilopaySecretKey) ? $sigilopaySecretKey : 'mx68p6qujgsetcgfe2z2ui22zqv1c67k6xi5sh4nodkh6njcfgd12as149s5k6xs';
 
             $checkUrls = [
                 'https://app.sigilopay.com.br/api/v1/gateway/transactions/' . urlencode($transactionId),
-                'https://app.sigilopay.com.br/api/v1/gateway/transaction/' . urlencode($transactionId),
-                'https://api.sigilopay.com.br/api/v1/transactions/' . urlencode($transactionId),
-                'https://api.sigilopay.com.br/api/v1/charges/' . urlencode($transactionId),
+                'https://app.sigilopay.com.br/api/v1/gateway/pix/' . urlencode($transactionId),
+                'https://app.sigilopay.com.br/api/v1/transactions/' . urlencode($transactionId),
+                'https://api.sigilopay.com.br/api/v1/gateway/pix/receive/' . urlencode($transactionId)
             ];
 
             foreach ($checkUrls as $checkUrl) {
@@ -209,7 +209,7 @@ try {
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_HTTPHEADER     => [
                         'x-public-key: ' . $pubK,
-                        'x-secret-key: '  . $secK,
+                        'x-secret-key: ' . $secK,
                         'Accept: application/json'
                     ],
                     CURLOPT_TIMEOUT        => 6,
@@ -225,14 +225,15 @@ try {
                     $st = strtoupper(
                         $resJson['status'] ??
                         $resJson['paymentStatus'] ??
+                        $resJson['payment_status'] ??
                         $resJson['data']['status'] ??
                         $resJson['data']['paymentStatus'] ??
                         ''
                     );
-                    if (in_array($st, ['PAID', 'APPROVED', 'CONFIRMED', 'COMPLETED', 'PAID_OUT', 'CAPTURED', 'ACTIVE'])) {
+                    if (in_array($st, ['PAID', 'APPROVED', 'CONFIRMED', 'COMPLETED', 'PAID_OUT', 'CAPTURED', 'ACTIVE', 'PAGO'])) {
                         $livePaid = true;
+                        break;
                     }
-                    break;
                 }
             }
         }

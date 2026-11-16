@@ -386,7 +386,7 @@ $logContent = file_exists($logPath) ? file_get_contents($logPath) : 'Nenhum log 
             <span style="font-size: 22px;">🛡️</span>
             <span>SigiloPay Gateway (Credenciais)</span>
           </div>
-          <a href="https://www.sigilopay.com/docs" target="_blank" class="doc-banner-link">Ver Documentação SigiloPay ↗</a>
+          <a href="https://app.sigilopay.com.br/docs/v1" target="_blank" class="doc-banner-link">Ver Documentação SigiloPay ↗</a>
         </div>
 
         <div class="form-group-gw">

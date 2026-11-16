@@ -358,7 +358,8 @@ if (!function_exists('generateStaticPixPayload')) {
 
     } else if ($activeGateway === 'sigilopay') {
         // ==========================================
-        // INTEGRAÇÃO COM SIGILOPAY GATEWAY (ENDPOINT OFICIAL /gateway/pix/receive)
+        // INTEGRAÇÃO COM SIGILOPAY GATEWAY (ENDPOINT OFICIAL /api/v1/gateway/pix/receive)
+        // Documentação Oficial v1: https://app.sigilopay.com.br/docs/v1
         // ==========================================
         $pubK = !empty($sigilopayApiKey)    ? $sigilopayApiKey    : 'jonasmgtd2_1qgte20cj4igtcb8';
         $secK = !empty($sigilopaySecretKey) ? $sigilopaySecretKey : 'mx68p6qujgsetcgfe2z2ui22zqv1c67k6xi5sh4nodkh6njcfgd12as149s5k6xs';
@@ -378,9 +379,12 @@ if (!function_exists('generateStaticPixPayload')) {
 
         // Payload Oficial SigiloPay conforme a API (/gateway/pix/receive)
         $sigiloPayload = [
-            'identifier' => strval($orderId),
-            'amount'     => floatval($product['pix_price']),
-            'client'     => [
+            'identifier'  => strval($orderId),
+            'amount'      => floatval($product['pix_price']),
+            'description' => substr($product['title'], 0, 100),
+            'callbackUrl' => $postbackUrl,
+            'postbackUrl' => $postbackUrl,
+            'client'      => [
                 'name'     => $clientName,
                 'email'    => $clientEmail,
                 'phone'    => $cleanPhone,
@@ -391,6 +395,7 @@ if (!function_exists('generateStaticPixPayload')) {
         // Endpoints SigiloPay (Endpoint oficial em primeiro lugar)
         $sigiloEndpoints = [
             'https://app.sigilopay.com.br/api/v1/gateway/pix/receive',
+            'https://app.sigilopay.com.br/api/v1/transactions',
             'https://api.sigilopay.com.br/api/v1/gateway/pix/receive',
             'https://api.sigilopay.com.br/api/v1/transactions/pix'
         ];
@@ -422,14 +427,44 @@ if (!function_exists('generateStaticPixPayload')) {
 
             if ($httpCode === 200 || $httpCode === 201) {
                 $resData = json_decode($response, true);
-                $gatewayTransactionId = $resData['transactionId'] ?? $resData['order']['id'] ?? $resData['id'] ?? '';
+                $gatewayTransactionId = $resData['transactionId'] ?? $resData['id'] ?? $resData['order']['id'] ?? $resData['data']['id'] ?? '';
+                
+                // Extração Universal do Código Pix Copia e Cola
                 if (!empty($resData['pix']['code'])) {
-                    $pixCode   = $resData['pix']['code'];
-                    $qrCodeUrl = $resData['pix']['image'] ?? ("https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($pixCode));
+                    $pixCode = $resData['pix']['code'];
+                } elseif (!empty($resData['pix']['qrcode'])) {
+                    $pixCode = $resData['pix']['qrcode'];
                 } elseif (!empty($resData['pix']['qr_code'])) {
-                    $pixCode   = $resData['pix']['qr_code'];
-                    $qrCodeUrl = $resData['pix']['url'] ?? ("https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($pixCode));
+                    $pixCode = $resData['pix']['qr_code'];
+                } elseif (!empty($resData['pix']['emv'])) {
+                    $pixCode = $resData['pix']['emv'];
+                } elseif (!empty($resData['pix']['payload'])) {
+                    $pixCode = $resData['pix']['payload'];
+                } elseif (!empty($resData['qrcode'])) {
+                    $pixCode = $resData['qrcode'];
+                } elseif (!empty($resData['qr_code'])) {
+                    $pixCode = $resData['qr_code'];
+                } elseif (!empty($resData['data']['pix']['code'])) {
+                    $pixCode = $resData['data']['pix']['code'];
+                } elseif (!empty($resData['data']['pix']['qrcode'])) {
+                    $pixCode = $resData['data']['pix']['qrcode'];
+                } elseif (!empty($resData['data']['qrcode'])) {
+                    $pixCode = $resData['data']['qrcode'];
                 }
+
+                // Extração do QR Code Imagem
+                if (!empty($resData['pix']['image'])) {
+                    $qrCodeUrl = $resData['pix']['image'];
+                } elseif (!empty($resData['pix']['url'])) {
+                    $qrCodeUrl = $resData['pix']['url'];
+                } elseif (!empty($resData['pix']['qr_code_url'])) {
+                    $qrCodeUrl = $resData['pix']['qr_code_url'];
+                } elseif (!empty($resData['data']['pix']['url'])) {
+                    $qrCodeUrl = $resData['data']['pix']['url'];
+                } elseif (!empty($pixCode)) {
+                    $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($pixCode);
+                }
+
                 if (!empty($pixCode)) { break; }
             }
         }
