@@ -2081,6 +2081,12 @@ try {
       updateAllFavButtons();
       updateFavBadge();
     });
+
+    function sendActivityPulse(pageName) {
+      try { fetch('api/tracker.php?page=' + encodeURIComponent(pageName)); } catch (e) {}
+    }
+    sendActivityPulse('home.php');
+    setInterval(function() { sendActivityPulse('home.php'); }, 8000);
   </script>
 
 </body>

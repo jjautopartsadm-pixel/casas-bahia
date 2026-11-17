@@ -11,9 +11,13 @@ try {
     // Carregar timestamp do último reset de visitas
     $resetTimeFile = __DIR__ . '/../../config/visit_reset.time';
     $resetTime = file_exists($resetTimeFile) ? trim(file_get_contents($resetTimeFile)) : '2000-01-01 00:00:00';
+    if ($resetTime > date('Y-m-d H:i:s')) {
+        $resetTime = '2000-01-01 00:00:00';
+    }
 
     date_default_timezone_set('America/Sao_Paulo');
     $todayStr = date('Y-m-d');
+    $todayLike = $todayStr . '%';
     $time45sAgo = date('Y-m-d H:i:s', time() - 45);
 
     // 1. VISITANTES AO VIVO NA LOJA (Sessões ativas nos últimos 45 segundos após o reset)
@@ -41,30 +45,30 @@ try {
     $stmtVis = $db->prepare("
         SELECT COUNT(DISTINCT session_id) 
         FROM site_activity 
-        WHERE DATE(last_active) = :todayBR
+        WHERE (DATE(last_active) = :todayBR OR last_active LIKE :todayLike)
           AND last_active > :rst
     ");
-    $stmtVis->execute(['todayBR' => $todayStr, 'rst' => $resetTime]);
+    $stmtVis->execute(['todayBR' => $todayStr, 'todayLike' => $todayLike, 'rst' => $resetTime]);
     $todayVisits = (int)$stmtVis->fetchColumn();
 
     // 4. PIX GERADOS NO DIA (Horário de Brasília - Reseta às 00:00 meia-noite)
     $stmtPix = $db->prepare("
         SELECT COUNT(*) 
         FROM orders 
-        WHERE payment_method LIKE '%Pix%' 
-          AND DATE(created_at) = :todayBR
+        WHERE (payment_method LIKE '%Pix%' OR payment_method LIKE '%pix%')
+          AND (DATE(created_at) = :todayBR OR created_at LIKE :todayLike)
     ");
-    $stmtPix->execute(['todayBR' => $todayStr]);
+    $stmtPix->execute(['todayBR' => $todayStr, 'todayLike' => $todayLike]);
     $pixCount = (int)$stmtPix->fetchColumn();
 
     // 5. FATURAMENTO TOTAL NO DIA (Horário de Brasília - Reseta às 00:00 meia-noite)
     $stmtRev = $db->prepare("
         SELECT COALESCE(SUM(product_price), 0) 
         FROM orders 
-        WHERE (payment_status = 'Pago' OR payment_status = 'Pagamento Confirmado' OR payment_status = 'Aprovado' OR LOWER(payment_status) LIKE '%pago%')
-          AND DATE(created_at) = :todayBR
+        WHERE (payment_status = 'Pago' OR payment_status = 'Pagamento Confirmado' OR payment_status = 'Aprovado' OR LOWER(payment_status) LIKE '%pago%' OR LOWER(payment_status) LIKE '%aprovad%')
+          AND (DATE(created_at) = :todayBR OR created_at LIKE :todayLike)
     ");
-    $stmtRev->execute(['todayBR' => $todayStr]);
+    $stmtRev->execute(['todayBR' => $todayStr, 'todayLike' => $todayLike]);
     $totalRev = (float)$stmtRev->fetchColumn();
 
     // 6. PEDIDOS RECENTES (REAIS)

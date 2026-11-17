@@ -376,5 +376,12 @@ if (empty($filteredProducts)) {
     <p style="margin-top: 4px; font-size: 11px;">Preços e condições exclusivos para compra online.</p>
   </footer>
 
+  <script>
+    function sendActivityPulse(pageName) {
+      try { fetch('api/tracker.php?page=' + encodeURIComponent(pageName)); } catch (e) {}
+    }
+    sendActivityPulse('categoria.php');
+    setInterval(function() { sendActivityPulse('categoria.php'); }, 8000);
+  </script>
 </body>
 </html>
