@@ -136,7 +136,7 @@ try {
                             $resJson['data']['paymentStatus'] ??
                             ''
                         );
-                        if (in_array($st, ['PAID', 'APPROVED', 'CONFIRMED', 'COMPLETED', 'PAID_OUT', 'CAPTURED', 'ACTIVE'])) {
+                        if (in_array($st, ['PAID', 'APPROVED', 'CONFIRMED', 'COMPLETED', 'PAID_OUT', 'CAPTURED', 'PAGO'])) {
                             $livePaid = true;
                             break 2;
                         }
@@ -230,7 +230,7 @@ try {
                         $resJson['data']['paymentStatus'] ??
                         ''
                     );
-                    if (in_array($st, ['PAID', 'APPROVED', 'CONFIRMED', 'COMPLETED', 'PAID_OUT', 'CAPTURED', 'ACTIVE', 'PAGO'])) {
+                    if (in_array($st, ['PAID', 'APPROVED', 'CONFIRMED', 'COMPLETED', 'PAID_OUT', 'CAPTURED', 'PAGO'])) {
                         $livePaid = true;
                         break;
                     }

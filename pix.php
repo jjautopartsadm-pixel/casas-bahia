@@ -52,7 +52,7 @@ $payUntilTimestamp = strtotime('+10 minutes');
 $payUntilFormatted = date('d/m/Y', $payUntilTimestamp) . ' às ' . date('H\hi', $payUntilTimestamp);
 
 $currentStatus = trim($order['payment_status'] ?? '');
-$isOrderPaid = in_array(strtolower($currentStatus), ['pago', 'pagamento confirmado', 'aprovado', 'paid', 'approved', 'confirmed', 'completed', 'paid_out']) || (isset($_GET['paid']) && $_GET['paid'] == '1');
+$isOrderPaid = in_array(strtolower($currentStatus), ['pago', 'pagamento confirmado', 'aprovado', 'paid', 'approved', 'confirmed', 'completed', 'paid_out']);
 
 // Endereço salvo do pedido
 $rawAddr = !empty($order['shipping_address']) ? $order['shipping_address'] : 'GERAL, 43 - ambrosio, Garopaba, SC, 88495-000';

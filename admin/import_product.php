@@ -669,6 +669,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $autoCategory = 'eletros';
             }
 
+            // Sincronizar sequências no PostgreSQL (Supabase) caso necessário
+            if ($driver === 'pgsql') {
+                try {
+                    $db->exec("SELECT setval(pg_get_serial_sequence('products', 'id'), COALESCE(MAX(id), 1)) FROM products");
+                    $db->exec("SELECT setval(pg_get_serial_sequence('product_images', 'id'), COALESCE(MAX(id), 1)) FROM product_images");
+                    $db->exec("SELECT setval(pg_get_serial_sequence('product_reviews', 'id'), COALESCE(MAX(id), 1)) FROM product_reviews");
+                    $db->exec("SELECT setval(pg_get_serial_sequence('specifications', 'id'), COALESCE(MAX(id), 1)) FROM specifications");
+                    $db->exec("SELECT setval(pg_get_serial_sequence('warranties', 'id'), COALESCE(MAX(id), 1)) FROM warranties");
+                } catch (Exception $eSyncSeq) {}
+            }
+
             $db->beginTransaction();
 
             $stmtIns = $db->prepare("
@@ -712,81 +723,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $importedProductId = $newProductId;
 
             // Inserir Imagens na Galeria
-            $stmtImg = $db->prepare("INSERT INTO product_images (product_id, image_url, is_main, sort_order) VALUES (:pid, :url, :is_main, :sort)");
-            foreach ($images as $idx => $imgUrl) {
-                $stmtImg->execute([
-                    'pid' => $newProductId,
-                    'url' => $imgUrl,
-                    'is_main' => ($idx === 0) ? 1 : 0,
-                    'sort' => $idx + 1
-                ]);
-            }
-
-            // Inserir Especificações Técnicas (extraídas do código fonte ou padrão)
-            $specsRaw = $_POST['specs_json'] ?? '';
-            $specs = json_decode($specsRaw, true);
-            if (!is_array($specs) || empty($specs)) {
-                $specs = [
-                    ['spec_name' => 'Marca', 'spec_value' => $brand],
-                    ['spec_name' => 'Código do Item', 'spec_value' => $itemCode],
-                    ['spec_name' => 'Garantia do Fabricante', 'spec_value' => '12 Meses']
-                ];
-            }
-            $stmtSpec = $db->prepare("INSERT INTO specifications (product_id, spec_name, spec_value) VALUES (:pid, :name, :val)");
-            foreach ($specs as $spec) {
-                if (!empty($spec['spec_name']) && !empty($spec['spec_value'])) {
-                    $stmtSpec->execute([
+            try {
+                $stmtImg = $db->prepare("INSERT INTO product_images (product_id, image_url, is_main, sort_order) VALUES (:pid, :url, :is_main, :sort)");
+                foreach ($images as $idx => $imgUrl) {
+                    $stmtImg->execute([
                         'pid' => $newProductId,
-                        'name' => $spec['spec_name'],
-                        'val' => $spec['spec_value']
+                        'url' => $imgUrl,
+                        'is_main' => ($idx === 0) ? 1 : 0,
+                        'sort' => $idx + 1
                     ]);
                 }
-            }
+            } catch (Exception $eImg) {}
+
+            // Inserir Especificações Técnicas (extraídas do código fonte ou padrão)
+            try {
+                $specsRaw = $_POST['specs_json'] ?? '';
+                $specs = json_decode($specsRaw, true);
+                if (!is_array($specs) || empty($specs)) {
+                    $specs = [
+                        ['spec_name' => 'Marca', 'spec_value' => $brand],
+                        ['spec_name' => 'Código do Item', 'spec_value' => $itemCode],
+                        ['spec_name' => 'Garantia do Fabricante', 'spec_value' => '12 Meses']
+                    ];
+                }
+                $stmtSpec = $db->prepare("INSERT INTO specifications (product_id, spec_name, spec_value) VALUES (:pid, :name, :val)");
+                foreach ($specs as $spec) {
+                    if (!empty($spec['spec_name']) && !empty($spec['spec_value'])) {
+                        $stmtSpec->execute([
+                            'pid' => $newProductId,
+                            'name' => $spec['spec_name'],
+                            'val' => $spec['spec_value']
+                        ]);
+                    }
+                }
+            } catch (Exception $eSpec) {}
 
             // Inserir Garantia Estendida SOMENTE se detectada no código fonte ou formulário manual
-            // Detectar pelo campo hasWarranty vindo do formulário (campo hidden setado no parse)
-            $hasExtendedWarranty = !empty($_POST['has_extended_warranty']) && $_POST['has_extended_warranty'] === '1';
-            
-            // Fallback: detectar pelo source_code se disponível
-            if (!$hasExtendedWarranty) {
-                $srcForWarranty = strtolower($_POST['source_code_raw'] ?? $_POST['source_code'] ?? '');
-                if (!empty($srcForWarranty)) {
-                    $hasExtendedWarranty = (
-                        strpos($srcForWarranty, 'garantia estendida') !== false ||
-                        strpos($srcForWarranty, 'garantia extra') !== false ||
-                        strpos($srcForWarranty, 'extended warranty') !== false ||
-                        strpos($srcForWarranty, '"warranty"') !== false ||
-                        strpos($srcForWarranty, 'warrantyoffer') !== false
-                    );
+            try {
+                $hasExtendedWarranty = !empty($_POST['has_extended_warranty']) && $_POST['has_extended_warranty'] === '1';
+                if (!$hasExtendedWarranty) {
+                    $srcForWarranty = strtolower($_POST['source_code_raw'] ?? $_POST['source_code'] ?? '');
+                    if (!empty($srcForWarranty)) {
+                        $hasExtendedWarranty = (
+                            strpos($srcForWarranty, 'garantia estendida') !== false ||
+                            strpos($srcForWarranty, 'garantia extra') !== false ||
+                            strpos($srcForWarranty, 'extended warranty') !== false ||
+                            strpos($srcForWarranty, '"warranty"') !== false ||
+                            strpos($srcForWarranty, 'warrantyoffer') !== false
+                        );
+                    }
                 }
-            }
 
-            $stmtWar = $db->prepare("INSERT INTO warranties (product_id, title, subtitle, monthly_price, is_default) VALUES (:pid, :title, :sub, :price, :def)");
+                if ($hasExtendedWarranty) {
+                    $stmtWar = $db->prepare("INSERT INTO warranties (product_id, title, subtitle, monthly_price, is_default) VALUES (:pid, :title, :sub, :price, :def)");
+                    $monthlyWarranty15 = round(($pixPrice * 0.15) / 12, 2);
+                    $stmtWar->execute(['pid' => $newProductId, 'title' => 'Sem garantia', 'sub' => 'só garantia de fábrica', 'price' => 0.00, 'def' => 1]);
+                    $stmtWar->execute(['pid' => $newProductId, 'title' => 'Com Garantia Estendida', 'sub' => 'por apenas R$ ' . number_format($monthlyWarranty15, 2, ',', '.') . ' por mês*', 'price' => $monthlyWarranty15, 'def' => 0]);
+                }
+            } catch (Exception $eWar) {}
 
-            if ($hasExtendedWarranty) {
-                // Produto TEM garantia estendida disponível — inserir as 2 opções
-                $monthlyWarranty15 = round(($pixPrice * 0.15) / 12, 2);
-                $stmtWar->execute(['pid' => $newProductId, 'title' => 'Sem garantia', 'sub' => 'só garantia de fábrica', 'price' => 0.00, 'def' => 1]);
-                $stmtWar->execute(['pid' => $newProductId, 'title' => 'Com Garantia Estendida', 'sub' => 'por apenas R$ ' . number_format($monthlyWarranty15, 2, ',', '.') . ' por mês*', 'price' => $monthlyWarranty15, 'def' => 0]);
-            }
-            // Se NÃO tem garantia estendida, não insere nada — seção fica oculta no produto
+            // GERAR E INSERIR AS AVALIAÇÕES SELECIONADAS PELO ADMIN
+            try {
+                $generatedReviews = generateRealisticReviews($reviewCount, $reviewGender, $reviewStars);
+                $stmtRev = $db->prepare("INSERT INTO product_reviews (product_id, author, reviewer_name, rating, rating_stars, review_date, content, review_text) VALUES (:pid, :author, :rev_name, :rating, :rating_stars, :rdate, :content, :rev_text)");
 
-            // GERAR E INSERIR AS AVALIAÇÕES SELECIONADAS PELO ADMIN (Sem anexar fotos automáticas)
-            $generatedReviews = generateRealisticReviews($reviewCount, $reviewGender, $reviewStars);
-            $stmtRev = $db->prepare("INSERT INTO product_reviews (product_id, author, reviewer_name, rating, rating_stars, review_date, content, review_text) VALUES (:pid, :author, :rev_name, :rating, :rating_stars, :rdate, :content, :rev_text)");
-
-            foreach ($generatedReviews as $rev) {
-                $stmtRev->execute([
-                    'pid' => $newProductId,
-                    'author' => $rev['author'],
-                    'rev_name' => $rev['author'],
-                    'rating' => $rev['rating'],
-                    'rating_stars' => $rev['rating'],
-                    'rdate' => $rev['review_date'],
-                    'content' => $rev['content'],
-                    'rev_text' => $rev['content']
-                ]);
-            }
+                foreach ($generatedReviews as $rev) {
+                    $stmtRev->execute([
+                        'pid' => $newProductId,
+                        'author' => $rev['author'],
+                        'rev_name' => $rev['author'],
+                        'rating' => $rev['rating'],
+                        'rating_stars' => $rev['rating'],
+                        'rdate' => $rev['review_date'],
+                        'content' => $rev['content'],
+                        'rev_text' => $rev['content']
+                    ]);
+                }
+            } catch (Exception $eRev) {}
 
             $db->commit();
             $successMsg = "🎉 Produto importado e cadastrado no MySQL com sucesso com <strong>$reviewCount avaliações</strong> ativas!";
@@ -1002,12 +1015,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <!-- SE JÁ ANALISOU O CÓDIGO FONTE, EXIBE O FORMULÁRIO DE CONFIRMAÇÃO COM OS DADOS EXTRAÍDOS E GERADOR DE AVALIAÇÕES -->
       <?php if ($parsedData): ?>
-        <div style="background: #e8f5e9; border: 2px solid #2e7d32; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; font-size: 15px; color: #1b5e20;">
-          <strong>✓ Passo 1 Concluído: Dados Extraídos com Sucesso!</strong><br>
-          <span style="font-size: 13px; color: #2e7d32;">⚠️ <strong>Atenção:</strong> O produto ainda <u>não está salvo</u> no catálogo. Revise os campos abaixo, role até o final da página e clique no botão verde <strong>"💾 Confirmar e Cadastrar Produto"</strong> para salvar.</span>
+        <div style="background: #e8f5e9; border: 2px solid #2e7d32; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; font-size: 15px; color: #1b5e20; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <strong>✓ Passo 1 Concluído: Dados Extraídos com Sucesso!</strong><br>
+            <span style="font-size: 13px; color: #2e7d32;">Revise os campos e clique no botão verde para gravar o produto no catálogo:</span>
+          </div>
+          <button type="submit" form="formSaveProduct" class="btn-submit" style="margin-top: 0; padding: 12px 24px; font-size: 15px; width: auto; flex-shrink: 0;">💾 Salvar no Catálogo Agora</button>
         </div>
 
-        <form method="POST">
+        <form method="POST" id="formSaveProduct">
           <input type="hidden" name="action" value="save">
           <input type="hidden" name="specs_json" value="<?= htmlspecialchars($parsedData['specs_json']) ?>">
           <input type="hidden" name="has_extended_warranty" value="<?= htmlspecialchars($parsedData['has_extended_warranty'] ?? '0') ?>">
