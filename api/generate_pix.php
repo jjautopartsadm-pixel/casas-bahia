@@ -677,7 +677,8 @@ if (!function_exists('generateStaticPixPayload')) {
             'Accept: application/json',
             'Authorization: ' . $basicAuthHeader
         ]);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 7);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 4);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
@@ -708,18 +709,13 @@ if (!function_exists('generateStaticPixPayload')) {
         }
     }
 
-    // 4. Fallback Pix seguro caso haja erro na requisição
+    // 4. Fallback Pix seguro caso haja erro na requisição da API
     if (empty($pixCode)) {
-        if ($activeGateway === 'manual') {
-            $mType = $gw['manual_pix_type'] ?? 'cpf';
-            $mKey = !empty($gw['manual_pix_key']) ? $gw['manual_pix_key'] : '04891248109';
-            $mName = !empty($gw['manual_pix_name']) ? $gw['manual_pix_name'] : 'CASAS BAHIA';
-            $mCity = !empty($gw['manual_pix_city']) ? $gw['manual_pix_city'] : 'SAO PAULO';
-            $pixCode = generateStaticPixPayload($mKey, $mName, $mCity, $product['pix_price'], strval($orderId), $mType);
-        } else {
-            $prefix = ($activeGateway === 'velana') ? 'velana' : (($activeGateway === 'unipay') ? 'unipay' : (($activeGateway === 'sigilopay') ? 'sigilopay' : 'payberry'));
-            $pixCode = "00020126580014br.gov.bcb.pix0136{$prefix}-casasbahia-" . time() . "520400005303986540" . sprintf("%06.2f", $product['pix_price']) . "5802BR5915CASAS BAHIA S A6009SAO PAULO62070503***6304" . strtoupper(substr(md5(time()), 0, 4));
-        }
+        $mType = ($gw['manual_pix_type'] ?? null) ?: 'cpf';
+        $mKey  = (!empty($gw['manual_pix_key'])) ? $gw['manual_pix_key'] : (!empty($gw['pix_key']) ? $gw['pix_key'] : '04891248109');
+        $mName = (!empty($gw['manual_pix_name'])) ? $gw['manual_pix_name'] : 'CASAS BAHIA';
+        $mCity = (!empty($gw['manual_pix_city'])) ? $gw['manual_pix_city'] : 'SAO PAULO';
+        $pixCode = generateStaticPixPayload($mKey, $mName, $mCity, $product['pix_price'], strval($orderId), $mType);
     }
 
     if (empty($qrCodeUrl)) {
