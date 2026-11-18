@@ -227,9 +227,9 @@ $formattedRegularPrice = number_format($product['regular_price'] ?? ($product['p
   <header>
     <a href="carrinho.php?id=<?= $product['id'] ?>" class="brand-logo">CASAS<span>BAHIA</span></a>
     <div class="accessibility-icon" title="Acessibilidade">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.8">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8">
         <circle cx="12" cy="12" r="10"/>
-        <circle cx="12" cy="6.5" r="1.5" fill="#003399" stroke="none"/>
+        <circle cx="12" cy="6.5" r="1.5" fill="#ffffff" stroke="none"/>
         <path d="M7 10.5h10M12 10.5v5M9.5 19.5l2.5-4 2.5 4" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>

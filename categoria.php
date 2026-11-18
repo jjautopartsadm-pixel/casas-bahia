@@ -182,19 +182,21 @@ if (empty($filteredProducts)) {
 
     .top-red-line { height: 4px; background-color: var(--cb-red); width: 100%; }
 
-    /* CABEÇALHO DA CASAS BAHIA */
-    .main-header { background-color: #ffffff; border-bottom: 1px solid var(--cb-gray-border); position: relative; z-index: 10; }
-    .header-top-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; }
-    .header-left-group { display: flex; align-items: center; gap: 8px; }
-    .brand-logo { font-size: 20px; font-weight: 800; color: var(--cb-blue-primary); letter-spacing: -0.5px; line-height: 1; display: flex; align-items: center; }
-    .brand-logo span { color: var(--cb-red); }
-    .header-actions { display: flex; gap: 14px; align-items: center; }
-    .header-icon-btn { background: none; border: none; color: var(--cb-blue-primary); cursor: pointer; display: flex; align-items: center; padding: 2px; }
+    /* CABEÇALHO DA CASAS BAHIA (FUNDO PRETO) */
+    .main-header { background-color: #000000; border-bottom: none; position: sticky; top: 0; z-index: 100; }
+    .header-top-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px 8px 16px; }
+    .header-left-group { display: flex; align-items: center; gap: 12px; }
+    .brand-logo { font-size: 21px; font-weight: 800; color: #ffffff !important; letter-spacing: -0.5px; line-height: 1; display: flex; align-items: center; text-decoration: none; }
+    .brand-logo span { color: #ffffff !important; }
+    .header-actions { display: flex; gap: 16px; align-items: center; }
+    .header-icon-btn { background: none; border: none; color: #ffffff; cursor: pointer; display: flex; align-items: center; padding: 2px; }
+    .header-icon-btn svg { stroke: #ffffff; }
 
-    .search-box-wrapper { padding: 0 16px 10px 16px; }
-    .search-input-container { display: flex; align-items: center; background-color: #ffffff; border: 1px solid #d0d0d0; border-radius: 6px; padding: 8px 12px; }
-    .search-input-container input { border: none; outline: none; width: 100%; font-size: 14px; font-weight: 400; color: var(--cb-text-dark); background: transparent; }
-    .search-icon { color: var(--cb-blue-primary); display: flex; align-items: center; }
+    .search-box-wrapper { padding: 4px 16px 10px 16px; }
+    .search-input-container { display: flex; align-items: center; background-color: #ffffff; border: none; border-radius: 7px; padding: 9px 12px; }
+    .search-input-container input { border: none; outline: none; width: 100%; font-size: 14.5px; font-weight: 400; color: #1e293b; background: transparent; }
+    .search-input-container input::placeholder { color: #555555; opacity: 1; }
+    .search-icon { color: #555555; display: flex; align-items: center; }
 
     /* NAVEGAÇÃO ENTRE CATEGORIAS (CARROSSEL COM ÍCONES) */
     .category-scroll-container { display: flex; gap: 16px; overflow-x: auto; padding: 18px 16px; background-color: #ffffff; border-bottom: 1px solid #eeeeee; scrollbar-width: none; }
@@ -247,7 +249,7 @@ if (empty($filteredProducts)) {
     <div class="header-top-row">
       <div class="header-left-group">
         <a href="home.php" class="header-icon-btn" aria-label="Voltar para a Home">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
         </a>
         
         <a href="home.php" class="brand-logo">
@@ -257,7 +259,7 @@ if (empty($filteredProducts)) {
 
       <div class="header-actions">
         <button class="header-icon-btn" onclick="window.location.href='carrinho.php?empty=1'" aria-label="Carrinho">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
         </button>
       </div>
     </div>
@@ -267,7 +269,7 @@ if (empty($filteredProducts)) {
       <div class="search-input-container">
         <input type="text" placeholder="Pesquisar em <?= htmlspecialchars($currentCategory['title']) ?>..." aria-label="Pesquisar">
         <span class="search-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666666" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555555" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
         </span>
       </div>
     </div>

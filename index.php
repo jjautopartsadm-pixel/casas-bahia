@@ -403,47 +403,60 @@ $product['discount_percentage'] = $realPercent;
     .top-red-line { height: 3px; background-color: #e30613; width: 100%; }
 
     /* CABEÇALHO COM LOGOTIPO LOGO APÓS O ÍCONE ≡ */
-    .main-header { background-color: transparent; border-bottom: none; position: relative; z-index: 10; }
-    .header-top-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; }
-    .header-left-group { display: flex; align-items: center; gap: 8px; }
-    .brand-logo { font-size: 20px; font-weight: 800; color: var(--cb-blue-primary); letter-spacing: -0.5px; line-height: 1; }
-    .brand-logo span { color: var(--cb-red); }
-    .header-actions { display: flex; gap: 14px; align-items: center; }
-    .header-icon-btn { background: none; border: none; color: var(--cb-blue-primary); cursor: pointer; display: flex; align-items: center; padding: 2px; }
+    .main-header { background-color: #000000; border-bottom: none; position: sticky; top: 0; z-index: 100; }
+    .header-top-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px 8px 16px; }
+    .header-left-group { display: flex; align-items: center; gap: 12px; }
+    .brand-logo { font-size: 21px; font-weight: 800; color: #ffffff !important; letter-spacing: -0.5px; line-height: 1; text-decoration: none; display: flex; align-items: center; }
+    .brand-logo span { color: #ffffff !important; }
+    .header-actions { display: flex; gap: 16px; align-items: center; }
+    .header-icon-btn { background: none; border: none; color: #ffffff; cursor: pointer; display: flex; align-items: center; padding: 2px; }
+    .header-icon-btn svg { stroke: #ffffff; }
     
-    .search-box-wrapper { padding: 0 16px 10px 16px; }
-    .search-input-container { display: flex; align-items: center; background-color: #ffffff; border: 1px solid #d0d0d0; border-radius: 6px; padding: 8px 12px; }
-    .search-input-container input { border: none; outline: none; width: 100%; font-size: 14px; font-weight: 400; color: var(--cb-text-dark); }
+    .search-box-wrapper { padding: 4px 16px 8px 16px; }
+    .search-input-container { display: flex; align-items: center; background-color: #ffffff; border: none; border-radius: 7px; padding: 9px 12px; }
+    .search-input-container input { border: none; outline: none; width: 100%; font-size: 14.5px; font-weight: 400; color: #1e293b; background: transparent; }
+    .search-input-container input::placeholder { color: #555555; opacity: 1; }
+    .search-icon { color: #555555; display: flex; align-items: center; }
     
-    .cep-delivery-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background-color: transparent; border: none; font-size: 14px; color: var(--cb-blue-primary); font-weight: 500; cursor: pointer; user-select: none; }
-    .cep-left-info { display: flex; align-items: center; gap: 10px; }
-    .cep-text-container { display: flex; flex-direction: column; }
-    .cep-label-only { font-size: 14px; color: var(--cb-blue-primary); font-weight: 500; }
-    .cep-label-top { font-size: 12px; color: var(--cb-blue-primary); font-weight: 400; line-height: 1.2; }
-    .cep-value-bottom { font-size: 14px; color: var(--cb-blue-primary); font-weight: 700; line-height: 1.2; }
+    .cep-delivery-bar { display: flex; align-items: center; justify-content: space-between; padding: 6px 16px 10px 16px; background-color: #000000; border: none; font-size: 14px; color: #ffffff; font-weight: 500; cursor: pointer; user-select: none; }
+    .cep-left-info { display: flex; align-items: center; gap: 10px; color: #ffffff; }
+    .cep-text-container { display: flex; flex-direction: column; color: #ffffff; }
+    .cep-label-only { font-size: 14.5px; color: #ffffff !important; font-weight: 500; }
+    .cep-label-top { font-size: 12px; color: #ffffff !important; font-weight: 400; line-height: 1.2; }
+    .cep-value-bottom { font-size: 14px; color: #ffffff !important; font-weight: 700; line-height: 1.2; }
 
-    /* ESTILOS DO MENU HAMBÚRGUER LATERAL (FULL SCREEN 100%) */
-    .nav-drawer-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: #ffffff; display: none; z-index: 3000; }
-    .nav-drawer-content { width: 100%; max-width: 100%; height: 100vh; background-color: #ffffff; overflow-y: auto; padding: 16px; box-shadow: none; display: flex; flex-direction: column; }
-    .nav-drawer-header { display: flex; justify-content: flex-end; align-items: center; padding-bottom: 12px; margin-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
-    .nav-drawer-close-btn { background: none; border: none; cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; }
-    .nav-drawer-user-box { border-bottom: 1px solid #eeeeee; padding-bottom: 18px; margin-bottom: 18px; }
-    .nav-user-info-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-    .nav-user-avatar { width: 44px; height: 44px; background-color: #ffffff; border: 1px solid #e5e5e5; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); flex-shrink: 0; }
-    .nav-user-title { font-size: 15px; font-weight: 700; color: #003399; }
-    .nav-user-subtitle { font-size: 12px; color: #556688; line-height: 1.3; font-weight: 400; }
-    .btn-nav-login { width: 100%; padding: 12px; border: 2px solid #003399; background-color: #ffffff; color: #003399; font-size: 15px; font-weight: 700; border-radius: 6px; cursor: pointer; }
-    .nav-quick-cards-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 16px; border-bottom: 1px solid #eeeeee; margin-bottom: 20px; }
-    .nav-quick-card { min-width: 100px; background-color: #f2f4f7; border-radius: 8px; padding: 14px 10px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600; color: #003399; }
-    .nav-departments-title { font-size: 18px; font-weight: 800; color: #555555; margin-bottom: 16px; }
-    .nav-departments-list { list-style: none; padding: 0; }
-    .nav-departments-list li a { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f0f0f0; color: #444444; font-size: 15px; font-weight: 400; }
-    .dept-left { display: flex; align-items: center; gap: 12px; }
+    /* ESTILOS DO MENU HAMBÚRGUER LATERAL (FULL SCREEN 100% FUNDO PRETO) */
+    .nav-drawer-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.7); display: none; z-index: 3000; }
+    .nav-drawer-content { width: 100%; max-width: 100%; height: 100vh; background-color: #000000; overflow-y: auto; padding: 0 16px 40px 16px; box-shadow: none; display: flex; flex-direction: column; color: #ffffff; }
+    .nav-drawer-header { display: flex; justify-content: flex-end; align-items: center; padding: 12px 0 10px 0; margin-bottom: 8px; border-bottom: none; }
+    .nav-drawer-close-btn { background: none; border: none; cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; color: #ffffff; }
+    .nav-drawer-close-btn svg { stroke: #ffffff; }
+    .nav-drawer-user-box { border-bottom: 1px solid #1f1f1f; padding-bottom: 20px; margin-bottom: 20px; }
+    .nav-user-info-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .nav-user-avatar { width: 44px; height: 44px; background-color: #ffffff; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.2); flex-shrink: 0; }
+    .nav-user-title { font-size: 15.5px; font-weight: 700; color: #ffffff; }
+    .nav-user-subtitle { font-size: 12.5px; color: #cbd5e1; line-height: 1.35; font-weight: 400; }
+    .btn-nav-login { width: 100%; height: 48px; border: none; background-color: #ffffff; color: #003399; font-size: 15.5px; font-weight: 700; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: opacity 0.2s; }
+    .btn-nav-login:active { opacity: 0.9; }
+    .nav-quick-cards-row { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 20px; border-bottom: 1px solid #1f1f1f; margin-bottom: 24px; scrollbar-width: none; }
+    .nav-quick-cards-row::-webkit-scrollbar { display: none; }
+    .nav-quick-card { flex: 1; min-width: 105px; background-color: #202022; border-radius: 12px; padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; font-size: 13.5px; font-weight: 500; color: #ffffff; border: none; cursor: pointer; text-decoration: none; transition: background 0.15s; }
+    .nav-quick-card:hover { background-color: #2a2a2d; }
+    .nav-quick-card svg { stroke: #ffffff; }
+    .nav-quick-card span { color: #ffffff; line-height: 1.25; }
+    .nav-departments-title { font-size: 20px; font-weight: 800; color: #ffffff; margin-bottom: 16px; letter-spacing: -0.3px; }
+    .nav-departments-list { list-style: none; padding: 0; margin: 0; }
+    .nav-departments-list li a { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid #141414; color: #ffffff; font-size: 15.5px; font-weight: 400; text-decoration: none; transition: background 0.15s; }
+    .nav-departments-list li a:hover { background-color: #0d0d0d; }
+    .dept-left { display: flex; align-items: center; gap: 14px; color: #ffffff; }
+    .dept-left svg { stroke: #ffffff; width: 22px; height: 22px; flex-shrink: 0; }
+    .dept-left span { color: #ffffff; font-size: 15.5px; }
+    .nav-departments-list li a > svg { stroke: #888888; width: 16px; height: 16px; flex-shrink: 0; }
 
     /* ESTILOS DA TELA DE IDENTIFICAÇÃO */
     .login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: #ffffff; z-index: 4000; display: none; flex-direction: column; overflow-y: auto; }
     .login-content { width: 100%; max-width: 600px; margin: 0 auto; min-height: 100vh; background-color: #ffffff; display: flex; flex-direction: column; }
-    .login-header-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #f0f0f0; }
+    .login-header-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background-color: #000000; border-bottom: none; }
     .login-body { padding: 24px 20px; flex: 1; }
     .btn-login-back { background: none; border: none; font-size: 15px; color: #444444; font-weight: 500; display: flex; align-items: center; gap: 6px; cursor: pointer; margin-bottom: 24px; padding: 0; }
     .login-main-title { font-size: 26px; font-weight: 800; color: #003399; margin-bottom: 28px; }
@@ -1232,7 +1245,7 @@ $product['discount_percentage'] = $realPercent;
     <div class="header-top-row">
       <div class="header-left-group">
         <button class="header-icon-btn" onclick="openNavDrawer()" aria-label="Menu">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
         </button>
         
         <a href="home.php" class="brand-logo">
@@ -1242,16 +1255,16 @@ $product['discount_percentage'] = $realPercent;
 
       <div class="header-actions">
         <button class="header-icon-btn" aria-label="Perfil" onclick="handleUserHeaderClick()">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </button>
         <div class="fav-header-wrap">
           <button class="header-icon-btn" aria-label="Favoritos" onclick="openFavModal()">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           </button>
           <span class="fav-count-badge" id="favBadge"></span>
         </div>
         <button class="header-icon-btn" aria-label="Carrinho" onclick="window.location.href='carrinho.php?empty=1'">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
         </button>
       </div>
     </div>
@@ -1261,7 +1274,7 @@ $product['discount_percentage'] = $realPercent;
       <div class="search-input-container">
         <input type="text" placeholder="O que você tá procurando?" aria-label="Pesquisar">
         <span class="search-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666666" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555555" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
         </span>
       </div>
     </div>
@@ -1269,7 +1282,7 @@ $product['discount_percentage'] = $realPercent;
     <!-- CEP Locator Bar -->
     <div class="cep-delivery-bar" id="cepBarToggle" onclick="openCepModal()">
       <div class="cep-left-info">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
         <div class="cep-text-container" id="cepTextContainer">
           <span class="cep-label-only">Informe seu CEP</span>
         </div>
@@ -1277,9 +1290,9 @@ $product['discount_percentage'] = $realPercent;
 
       <!-- Ícone de Acessibilidade Oficial -->
       <div class="cep-accessibility-icon" title="Acessibilidade">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.5">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8">
           <circle cx="12" cy="12" r="10"/>
-          <circle cx="12" cy="6.5" r="1.5" fill="#003399" stroke="none"/>
+          <circle cx="12" cy="6.5" r="1.5" fill="#ffffff" stroke="none"/>
           <path d="M7 10.5h10M12 10.5v5M9.5 19.5l2.5-4 2.5 4" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
@@ -1289,12 +1302,13 @@ $product['discount_percentage'] = $realPercent;
   <?php require_once __DIR__ . '/includes/search_modal.php'; ?>
   <?php require_once __DIR__ . '/includes/account_modal.php'; ?>
 
-  <!-- NAVIGATION SIDE DRAWER -->
+  <!-- NAVIGATION SIDE DRAWER (MENU HAMBÚRGUER LATERAL - FUNDO PRETO) -->
   <div class="nav-drawer-overlay" id="navDrawerOverlay" onclick="closeNavDrawer(event)">
     <div class="nav-drawer-content" onclick="event.stopPropagation()">
+      <div class="top-red-line" style="margin: 0 -16px 8px -16px; width: calc(100% + 32px);"></div>
       <div class="nav-drawer-header">
         <button class="nav-drawer-close-btn" onclick="closeNavDrawer(event)" aria-label="Fechar Menu">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
 
@@ -1317,15 +1331,15 @@ $product['discount_percentage'] = $realPercent;
 
       <div class="nav-quick-cards-row">
         <div class="nav-quick-card" onclick="openMyOrdersModal()" style="cursor: pointer;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
           <span>Meus<br>Pedidos</span>
         </div>
         <div class="nav-quick-card" onclick="openFavModal()" style="cursor: pointer;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           <span>Meus<br>Favoritos</span>
         </div>
         <div class="nav-quick-card" onclick="window.location.href='carrinho.php?empty=1'" style="cursor: pointer;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
           <span>Meu<br>Carrinho</span>
         </div>
       </div>
@@ -1335,48 +1349,48 @@ $product['discount_percentage'] = $realPercent;
         
         <ul class="nav-departments-list">
           <li>
-            <a href="#">
+            <a href="categoria.php?cat=moveis">
               <div class="dept-left">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.8"><path d="M2 17h20v2H2zM4 17V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9"/></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><path d="M2 17h20v2H2zM4 17V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9"/></svg>
                 <span>Móveis</span>
               </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.8"><polyline points="9 18 15 12 9 6"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.8"><polyline points="9 18 15 12 9 6"/></svg>
             </a>
           </li>
           <li>
-            <a href="#">
+            <a href="categoria.php?cat=celulares">
               <div class="dept-left">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.8"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
                 <span>Celulares e Smartphones</span>
               </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.8"><polyline points="9 18 15 12 9 6"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.8"><polyline points="9 18 15 12 9 6"/></svg>
             </a>
           </li>
           <li>
-            <a href="#">
+            <a href="categoria.php?cat=eletrodomesticos">
               <div class="dept-left">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="10" y1="6" x2="10" y2="8"/><line x1="10" y1="14" x2="10" y2="18"/></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="10" y1="6" x2="10" y2="8"/><line x1="10" y1="14" x2="10" y2="18"/></svg>
                 <span>Eletrodomésticos</span>
               </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.8"><polyline points="9 18 15 12 9 6"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.8"><polyline points="9 18 15 12 9 6"/></svg>
             </a>
           </li>
           <li>
-            <a href="#">
+            <a href="categoria.php?cat=eletroportateis">
               <div class="dept-left">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.8"><path d="M6 3h12v4H6zM8 7v14M16 7v14"/></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><path d="M7 3h10l-1 12H8L7 3z"/><path d="M8 15v4h8v-4"/><path d="M6 19h12v2H6z"/><path d="M7 6H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2"/></svg>
                 <span>Eletroportáteis</span>
               </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.8"><polyline points="9 18 15 12 9 6"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.8"><polyline points="9 18 15 12 9 6"/></svg>
             </a>
           </li>
           <li>
-            <a href="#">
+            <a href="categoria.php?cat=tvs">
               <div class="dept-left">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 <span>TVs e Vídeos</span>
               </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.8"><polyline points="9 18 15 12 9 6"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.8"><polyline points="9 18 15 12 9 6"/></svg>
             </a>
           </li>
         </ul>
@@ -1394,9 +1408,9 @@ $product['discount_percentage'] = $realPercent;
           CASAS<span>BAHIA</span>
         </a>
         <div class="cep-accessibility-icon" title="Acessibilidade">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.8">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8">
             <circle cx="12" cy="12" r="10"/>
-            <circle cx="12" cy="6.5" r="1.5" fill="#003399" stroke="none"/>
+            <circle cx="12" cy="6.5" r="1.5" fill="#ffffff" stroke="none"/>
             <path d="M7 10.5h10M12 10.5v5M9.5 19.5l2.5-4 2.5 4" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
@@ -2401,8 +2415,9 @@ $product['discount_percentage'] = $realPercent;
       if (subEl) subEl.textContent = 'Acesse sua conta ou cadastre-se para ver seus pedidos';
       if (btnEl) {
         btnEl.textContent = 'Entre ou Cadastre-se';
-        btnEl.style.borderColor = '#003399';
+        btnEl.style.border = 'none';
         btnEl.style.color = '#003399';
+        btnEl.style.backgroundColor = '#ffffff';
       }
       return false;
     }
@@ -2630,7 +2645,7 @@ $product['discount_percentage'] = $realPercent;
 
       var cepBar = document.getElementById('cepTextContainer');
       if (cepBar) {
-        cepBar.innerHTML = `<span style="font-weight:700; color:#003399;">Receber em ${cityStateText}</span>`;
+        cepBar.innerHTML = `<span style="font-weight:700; color:#ffffff;">Receber em ${cityStateText}</span>`;
       }
     }
 

@@ -169,8 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
           // Entregar em: [CEP] - [CIDADE]
           if (cepTextContainer) {
             cepTextContainer.innerHTML = `
-              <span class="cep-label-top" style="font-size: 12px; color: #003399; font-weight: 400; display: block; line-height: 1.2;">Entregar em:</span>
-              <span class="cep-value-bottom" style="font-size: 14px; color: #003399; font-weight: 700; display: block; line-height: 1.2;">${formattedCep} - ${cityState}</span>
+              <span class="cep-label-top" style="font-size: 12px; color: #ffffff; font-weight: 400; display: block; line-height: 1.2;">Entregar em:</span>
+              <span class="cep-value-bottom" style="font-size: 14px; color: #ffffff; font-weight: 700; display: block; line-height: 1.2;">${formattedCep} - ${cityState}</span>
             `;
           }
 
@@ -226,8 +226,8 @@ document.addEventListener('DOMContentLoaded', () => {
         formattedCep = savedCep;
       }
       cepContainer.innerHTML = `
-        <span class="cep-label-top" style="font-size: 12px; color: #003399; font-weight: 400; display: block; line-height: 1.2;">Entregar em:</span>
-        <span class="cep-value-bottom" style="font-size: 14px; color: #003399; font-weight: 700; display: block; line-height: 1.2;">${formattedCep} - ${savedCityState}</span>
+        <span class="cep-label-top" style="font-size: 12px; color: #ffffff; font-weight: 400; display: block; line-height: 1.2;">Entregar em:</span>
+        <span class="cep-value-bottom" style="font-size: 14px; color: #ffffff; font-weight: 700; display: block; line-height: 1.2;">${formattedCep} - ${savedCityState}</span>
       `;
 
       if (pdpCepInput) pdpCepInput.value = formattedCep;

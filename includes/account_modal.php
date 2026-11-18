@@ -4,12 +4,12 @@
   <div style="height: 4px; background-color: #e30613; width: 100%;"></div>
 
   <!-- HEADER -->
-  <header style="background: #ffffff; padding: 14px 16px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
-    <a href="home.php" class="brand-logo" style="font-size: 20px; font-weight: 900; color: #003399; text-decoration: none; letter-spacing: -0.5px;">CASAS<span style="color: #e30613;">BAHIA</span></a>
-    <div class="accessibility-icon" title="Acessibilidade" onclick="closeMyAccountModal()" style="cursor: pointer;">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#003399" stroke-width="1.8">
+  <header style="background: #000000; padding: 14px 16px; border-bottom: none; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;">
+    <a href="home.php" class="brand-logo" style="font-size: 21px; font-weight: 800; color: #ffffff !important; text-decoration: none; letter-spacing: -0.5px;">CASAS<span style="color: #ffffff !important;">BAHIA</span></a>
+    <div class="accessibility-icon" title="Acessibilidade" onclick="closeMyAccountModal()" style="cursor: pointer; color: #ffffff;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8">
         <circle cx="12" cy="12" r="10"/>
-        <circle cx="12" cy="6.5" r="1.5" fill="#003399" stroke="none"/>
+        <circle cx="12" cy="6.5" r="1.5" fill="#ffffff" stroke="none"/>
         <path d="M7 10.5h10M12 10.5v5M9.5 19.5l2.5-4 2.5 4" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
