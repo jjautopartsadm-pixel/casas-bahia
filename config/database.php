@@ -6,13 +6,41 @@
 // FORÇAR FUSO HORÁRIO OFICIAL DE BRASÍLIA BRASIL (UTC-3)
 date_default_timezone_set('America/Sao_Paulo');
 
+// Suporte a DATABASE_URL / POSTGRES_URL (Vercel & Supabase integration)
+$rawDbUrl = getenv('DATABASE_URL') ?: getenv('POSTGRES_URL') ?: getenv('POSTGRES_PRISMA_URL') ?: getenv('POSTGRES_URL_NON_POOLING') ?: '';
+$parsedDbHost = '';
+$parsedDbPort = '';
+$parsedDbUser = '';
+$parsedDbPass = '';
+$parsedDbName = '';
+$parsedDriver = '';
+
+if (!empty($rawDbUrl)) {
+    $pUrl = parse_url($rawDbUrl);
+    if ($pUrl) {
+        $parsedDbHost = $pUrl['host'] ?? '';
+        $parsedDbPort = isset($pUrl['port']) ? strval($pUrl['port']) : '';
+        $parsedDbUser = isset($pUrl['user']) ? urldecode($pUrl['user']) : '';
+        $parsedDbPass = isset($pUrl['pass']) ? urldecode($pUrl['pass']) : '';
+        $parsedDbName = isset($pUrl['path']) ? ltrim($pUrl['path'], '/') : '';
+        $scheme = strtolower($pUrl['scheme'] ?? '');
+        if (strpos($scheme, 'postgres') !== false || strpos($scheme, 'pgsql') !== false) {
+            $parsedDriver = 'pgsql';
+            if (empty($parsedDbPort)) $parsedDbPort = '5432';
+        } else {
+            $parsedDriver = 'mysql';
+            if (empty($parsedDbPort)) $parsedDbPort = '3306';
+        }
+    }
+}
+
 // Credenciais do Banco de Dados (Suporta MySQL e Supabase / PostgreSQL)
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_NAME', getenv('DB_NAME') ?: 'test');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') ?: 'root');
-define('DB_PORT', getenv('DB_PORT') ?: '3306');
-define('DB_DRIVER', getenv('DB_DRIVER') ?: ((DB_PORT == '5432' || DB_PORT == '6543' || strpos(DB_HOST, 'supabase') !== false || strpos(DB_HOST, 'neon') !== false || strpos(DB_HOST, 'postgres') !== false) ? 'pgsql' : 'mysql'));
+define('DB_HOST', getenv('DB_HOST') ?: ($parsedDbHost ?: 'localhost'));
+define('DB_NAME', getenv('DB_NAME') ?: ($parsedDbName ?: 'test'));
+define('DB_USER', getenv('DB_USER') ?: ($parsedDbUser ?: 'root'));
+define('DB_PASS', getenv('DB_PASS') ?: ($parsedDbPass ?: 'root'));
+define('DB_PORT', getenv('DB_PORT') ?: ($parsedDbPort ?: '3306'));
+define('DB_DRIVER', getenv('DB_DRIVER') ?: ($parsedDriver ?: ((DB_PORT == '5432' || DB_PORT == '6543' || strpos(DB_HOST, 'supabase') !== false || strpos(DB_HOST, 'neon') !== false || strpos(DB_HOST, 'postgres') !== false) ? 'pgsql' : 'mysql')));
 
 function getDBConnection() {
     static $pdo = null;
