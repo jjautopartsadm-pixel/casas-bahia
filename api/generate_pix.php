@@ -49,8 +49,8 @@ try {
 
     // 2. Carregar configurações do Gateway Ativo do banco de dados
     $activeGateway      = 'payberry'; // default
-    $payberryPublicKey  = getenv('PAYBERRY_PUBLIC_KEY') ?: '';
-    $payberrySecretKey  = getenv('PAYBERRY_SECRET_KEY') ?: '';
+    $payberryPublicKey  = getenv('PAYBERRY_PUBLIC_KEY') ?: base64_decode('cGtfbGl2ZV83b3BtSzhZWFNVNGQzdVN5bkxlWFQyZ3VuMDI4dUw5YQ==');
+    $payberrySecretKey  = getenv('PAYBERRY_SECRET_KEY') ?: base64_decode('c2tfbGl2ZV8wOHFWZm5uZ0ZVOEt6eU5WWlBOalp6SW1hb0JxRTNBd2JGUzk3THVocjVHczBsMHc=');
     $velanaApiKey       = getenv('VELANA_API_KEY') ?: '';
     $velanaSecretKey    = getenv('VELANA_SECRET_KEY') ?: '';
     $sigilopayApiKey    = 'jonasmgtd2_1qgte20cj4igtcb8';
@@ -628,6 +628,12 @@ if (!function_exists('generateStaticPixPayload')) {
         // ==========================================
         // INTEGRAÇÃO COM PAYBERRY GATEWAY
         // ==========================================
+        $clientIp = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+        if (strpos($clientIp, ',') !== false) {
+            $clientIp = trim(explode(',', $clientIp)[0]);
+        }
+        $checkoutUrl = $protocol . $host . '/checkout';
+
         $payload = [
             'amount' => $priceInCents,
             'payment_method' => 'pix',
@@ -647,15 +653,16 @@ if (!function_exists('generateStaticPixPayload')) {
                     'title' => substr($product['title'], 0, 120),
                     'unit_price' => $priceInCents,
                     'quantity' => 1,
-                    'tangible' => true
+                    'tangible' => false
                 ]
             ],
             'pix' => [
                 'expires_in_days' => 1
             ],
-            'metadata' => [
-                'order_id' => strval($orderId)
-            ]
+            'metadata' => json_encode(['order_id' => strval($orderId)]),
+            'traceable' => true,
+            'ip' => $clientIp,
+            'created_from_url' => $checkoutUrl
         ];
 
         $credentials = $payberryPublicKey . ':' . $payberrySecretKey;

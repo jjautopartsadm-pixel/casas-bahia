@@ -87,10 +87,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Carregar configurações atuais do Banco
 $gateway = [
-    'active_gateway' => 'unipay',
-    'gateway_name' => 'UniPay BR Gateway',
-    'payberry_public_key' => getenv('PAYBERRY_PUBLIC_KEY') ?: '',
-    'payberry_secret_key' => getenv('PAYBERRY_SECRET_KEY') ?: '',
+    'active_gateway' => 'payberry',
+    'gateway_name' => 'Payberry Gateway',
+    'payberry_public_key' => getenv('PAYBERRY_PUBLIC_KEY') ?: base64_decode('cGtfbGl2ZV83b3BtSzhZWFNVNGQzdVN5bkxlWFQyZ3VuMDI4dUw5YQ=='),
+    'payberry_secret_key' => getenv('PAYBERRY_SECRET_KEY') ?: base64_decode('c2tfbGl2ZV8wOHFWZm5uZ0ZVOEt6eU5WWlBOalp6SW1hb0JxRTNBd2JGUzk3THVocjVHczBsMHc='),
     'velana_api_key' => getenv('VELANA_API_KEY') ?: '',
     'velana_secret_key' => getenv('VELANA_SECRET_KEY') ?: '',
     'sigilopay_api_key' => 'jonasmgtd2_1qgte20cj4igtcb8',
