@@ -15,20 +15,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $activeStatus = isset($_POST['active_status']) ? 1 : 0;
 
     try {
-        $stmt = $db->prepare("
-            INSERT INTO pixel_settings (id, pixel_id, access_token, test_event_code, active_status)
-            VALUES (1, :pid, :token, :test_code, :status)
-            ON DUPLICATE KEY UPDATE 
-                pixel_id = VALUES(pixel_id),
-                access_token = VALUES(access_token),
-                test_event_code = VALUES(test_event_code),
-                active_status = VALUES(active_status)
-        ");
+        $check = $db->query("SELECT id FROM pixel_settings WHERE id = 1")->fetch();
+        if ($check) {
+            $stmt = $db->prepare("
+                UPDATE pixel_settings SET 
+                    pixel_id = :pid,
+                    access_token = :token,
+                    test_event_code = :test_code,
+                    active_status = :status,
+                    updated_at = :up_at
+                WHERE id = 1
+            ");
+        } else {
+            $stmt = $db->prepare("
+                INSERT INTO pixel_settings (id, pixel_id, access_token, test_event_code, active_status, updated_at)
+                VALUES (1, :pid, :token, :test_code, :status, :up_at)
+            ");
+        }
         $stmt->execute([
             'pid' => $pixelId,
             'token' => $accessToken,
             'test_code' => $testEventCode,
-            'status' => $activeStatus
+            'status' => $activeStatus,
+            'up_at' => date('Y-m-d H:i:s')
         ]);
         $message = "Configurações do Facebook Pixel & CAPI salvas com sucesso!";
     } catch (Exception $e) {

@@ -25,25 +25,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $messageTemplate = trim($_POST['message_template'] ?? '');
 
         try {
-            $stmt = $db->prepare("
-                INSERT INTO zapi_settings (id, instance_id, instance_token, client_token, is_active, send_image, message_template, updated_at)
-                VALUES (1, :iid, :itok, :ctok, :act, :simg, :tpl, NOW())
-                ON DUPLICATE KEY UPDATE
-                    instance_id = VALUES(instance_id),
-                    instance_token = VALUES(instance_token),
-                    client_token = VALUES(client_token),
-                    is_active = VALUES(is_active),
-                    send_image = VALUES(send_image),
-                    message_template = VALUES(message_template),
-                    updated_at = NOW()
-            ");
+            $check = $db->query("SELECT id FROM zapi_settings WHERE id = 1")->fetch();
+            $nowDate = date('Y-m-d H:i:s');
+            if ($check) {
+                $stmt = $db->prepare("
+                    UPDATE zapi_settings SET 
+                        instance_id = :iid,
+                        instance_token = :itok,
+                        client_token = :ctok,
+                        is_active = :act,
+                        send_image = :simg,
+                        message_template = :tpl,
+                        updated_at = :up_at
+                    WHERE id = 1
+                ");
+            } else {
+                $stmt = $db->prepare("
+                    INSERT INTO zapi_settings (id, instance_id, instance_token, client_token, is_active, send_image, message_template, updated_at)
+                    VALUES (1, :iid, :itok, :ctok, :act, :simg, :tpl, :up_at)
+                ");
+            }
             $stmt->execute([
-                'iid'  => $instanceId,
-                'itok' => $instanceToken,
-                'ctok' => $clientToken,
-                'act'  => $isActive,
-                'simg' => $sendImage,
-                'tpl'  => $messageTemplate
+                'iid'   => $instanceId,
+                'itok'  => $instanceToken,
+                'ctok'  => $clientToken,
+                'act'   => $isActive,
+                'simg'  => $sendImage,
+                'tpl'   => $messageTemplate,
+                'up_at' => $nowDate
             ]);
             $message = 'Configurações da Z-API salvas com sucesso!';
         } catch (Exception $e) {
