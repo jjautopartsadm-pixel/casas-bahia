@@ -6,8 +6,26 @@
 // FORÇAR FUSO HORÁRIO OFICIAL DE BRASÍLIA BRASIL (UTC-3)
 date_default_timezone_set('America/Sao_Paulo');
 
+// Helper para obter variáveis de ambiente com máxima compatibilidade serverless
+function getEnvVar($key, $default = '') {
+    return $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key) ?: $default;
+}
+
 // Suporte a DATABASE_URL / POSTGRES_URL (Vercel & Supabase integration)
-$rawDbUrl = getenv('DATABASE_URL') ?: getenv('POSTGRES_URL') ?: getenv('POSTGRES_PRISMA_URL') ?: getenv('POSTGRES_URL_NON_POOLING') ?: '';
+$rawDbUrl = $_ENV['DATABASE_URL'] 
+    ?? $_SERVER['DATABASE_URL'] 
+    ?? getenv('DATABASE_URL') 
+    ?? $_ENV['POSTGRES_URL'] 
+    ?? $_SERVER['POSTGRES_URL'] 
+    ?? getenv('POSTGRES_URL') 
+    ?? $_ENV['POSTGRES_PRISMA_URL'] 
+    ?? $_SERVER['POSTGRES_PRISMA_URL'] 
+    ?? getenv('POSTGRES_PRISMA_URL') 
+    ?? $_ENV['POSTGRES_URL_NON_POOLING'] 
+    ?? $_SERVER['POSTGRES_URL_NON_POOLING'] 
+    ?? getenv('POSTGRES_URL_NON_POOLING') 
+    ?? '';
+
 $parsedDbHost = '';
 $parsedDbPort = '';
 $parsedDbUser = '';
@@ -35,12 +53,16 @@ if (!empty($rawDbUrl)) {
 }
 
 // Credenciais do Banco de Dados (Suporta MySQL e Supabase / PostgreSQL)
-define('DB_HOST', getenv('DB_HOST') ?: ($parsedDbHost ?: 'localhost'));
-define('DB_NAME', getenv('DB_NAME') ?: ($parsedDbName ?: 'test'));
-define('DB_USER', getenv('DB_USER') ?: ($parsedDbUser ?: 'root'));
-define('DB_PASS', getenv('DB_PASS') ?: ($parsedDbPass ?: 'root'));
-define('DB_PORT', getenv('DB_PORT') ?: ($parsedDbPort ?: '3306'));
-define('DB_DRIVER', getenv('DB_DRIVER') ?: ($parsedDriver ?: ((DB_PORT == '5432' || DB_PORT == '6543' || strpos(DB_HOST, 'supabase') !== false || strpos(DB_HOST, 'neon') !== false || strpos(DB_HOST, 'postgres') !== false) ? 'pgsql' : 'mysql')));
+define('DB_HOST', getEnvVar('DB_HOST', $parsedDbHost ?: 'localhost'));
+define('DB_NAME', getEnvVar('DB_NAME', $parsedDbName ?: 'test'));
+define('DB_USER', getEnvVar('DB_USER', $parsedDbUser ?: 'root'));
+define('DB_PASS', getEnvVar('DB_PASS', $parsedDbPass ?: 'root'));
+define('DB_PORT', getEnvVar('DB_PORT', $parsedDbPort ?: '3306'));
+define('DB_DRIVER', getEnvVar('DB_DRIVER', $parsedDriver ?: ((DB_PORT == '5432' || DB_PORT == '6543' || strpos(DB_HOST, 'supabase') !== false || strpos(DB_HOST, 'neon') !== false || strpos(DB_HOST, 'postgres') !== false) ? 'pgsql' : 'mysql')));
+
+$GLOBALS['DB_LAST_REMOTE_ERROR'] = null;
+$GLOBALS['DB_ACTIVE_DRIVER'] = null;
+$GLOBALS['DB_CONNECTED_HOST'] = null;
 
 function getDBConnection() {
     static $pdo = null;
@@ -57,21 +79,26 @@ function getDBConnection() {
                 $dsn = "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";sslmode=require";
                 $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
                 try { $pdo->exec("SET TIME ZONE 'America/Sao_Paulo'"); } catch (Exception $eTz) {}
-                ensureExtraTablesExist($pdo, 'pgsql');
+                try { ensureExtraTablesExist($pdo, 'pgsql'); } catch (Exception $eTables) {}
+                $GLOBALS['DB_ACTIVE_DRIVER'] = 'pgsql';
+                $GLOBALS['DB_CONNECTED_HOST'] = DB_HOST;
             } else {
                 $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=utf8mb4";
-                // Suporte a SSL para bancos MySQL em nuvem (ex: TiDB Cloud, Aiven, PlanetScale, AWS RDS)
-                if (getenv('DB_SSL') === 'true' || getenv('DB_SSL') === '1' || getenv('MYSQL_ATTR_SSL_CA')) {
+                if (getEnvVar('DB_SSL') === 'true' || getEnvVar('DB_SSL') === '1' || getEnvVar('MYSQL_ATTR_SSL_CA')) {
                     $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
                 }
                 $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
                 try { $pdo->exec("SET time_zone = '-03:00'"); } catch (Exception $eTz) {}
-                ensureExtraTablesExist($pdo, 'mysql');
+                try { ensureExtraTablesExist($pdo, 'mysql'); } catch (Exception $eTables) {}
+                $GLOBALS['DB_ACTIVE_DRIVER'] = 'mysql';
+                $GLOBALS['DB_CONNECTED_HOST'] = DB_HOST;
             }
         } catch (PDOException $e) {
-            // Em ambiente local ou fallback sem MySQL remoto configurado, usa SQLite
+            $GLOBALS['DB_LAST_REMOTE_ERROR'] = $e->getMessage();
+            
+            // Em ambiente local ou fallback sem banco remoto configurado, usa SQLite
             $sqliteSource = realpath(__DIR__ . '/../database.sqlite') ?: (__DIR__ . '/../database.sqlite');
-            $isServerless = (getenv('VERCEL') || getenv('NOW_REGION') || getenv('AWS_LAMBDA_FUNCTION_NAME') || !is_writable($sqliteSource));
+            $isServerless = (getEnvVar('VERCEL') || getEnvVar('NOW_REGION') || getEnvVar('AWS_LAMBDA_FUNCTION_NAME') || !is_writable($sqliteSource));
             
             if ($isServerless) {
                 // Em ambiente serverless (Vercel com disco somente-leitura) copia para /tmp
@@ -83,7 +110,6 @@ function getDBConnection() {
                 }
                 $sqlitePath = file_exists($sqliteTmp) ? $sqliteTmp : $sqliteSource;
             } else {
-                // Ambiente Local (Windows/Linux): grava DIRETAMENTE no database.sqlite do projeto!
                 $sqlitePath = $sqliteSource;
             }
 
@@ -96,9 +122,11 @@ function getDBConnection() {
                         return mt_rand() / mt_getrandmax();
                     });
                 }
-                ensureExtraTablesExist($pdo, 'sqlite');
+                try { ensureExtraTablesExist($pdo, 'sqlite'); } catch (Exception $eTables) {}
+                $GLOBALS['DB_ACTIVE_DRIVER'] = 'sqlite';
+                $GLOBALS['DB_CONNECTED_HOST'] = 'sqlite:/tmp';
             } catch (Exception $ex) {
-                throw new Exception("Banco de dados não configurado na Vercel. Adicione as variáveis de ambiente (DB_HOST, DB_NAME, DB_USER, DB_PASS, DB_PORT) nas configurações do seu projeto na Vercel.");
+                throw new Exception("Banco de dados não configurado na Vercel: " . $e->getMessage());
             }
         }
     }
@@ -120,10 +148,16 @@ function ensureExtraTablesExist($pdo, $driver = 'mysql') {
     try {
         if ($driver === 'pgsql') {
             $pkType = 'SERIAL PRIMARY KEY';
+            $dtType = 'TIMESTAMP';
+            $textType = 'TEXT';
         } elseif ($driver === 'sqlite') {
             $pkType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
+            $dtType = 'DATETIME';
+            $textType = 'TEXT';
         } else {
             $pkType = 'INT AUTO_INCREMENT PRIMARY KEY';
+            $dtType = 'DATETIME';
+            $textType = 'LONGTEXT';
         }
 
         $pdo->exec("
@@ -149,29 +183,29 @@ function ensureExtraTablesExist($pdo, $driver = 'mysql') {
                 variation_name VARCHAR(100) DEFAULT NULL,
                 variation_options TEXT DEFAULT NULL,
                 variation_default VARCHAR(100) DEFAULT NULL,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                created_at $dtType DEFAULT CURRENT_TIMESTAMP
             );
         ");
 
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `sku` VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `item_code` VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `badge_1` VARCHAR(100) DEFAULT 'BRASIL'"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `badge_2` VARCHAR(100) DEFAULT 'LANÇAMENTO★'"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `discount_percentage` INT DEFAULT 7"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `regular_price` DECIMAL(10,2) DEFAULT 0.00"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `pix_price` DECIMAL(10,2) DEFAULT 0.00"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `pix_discount_percentage` INT DEFAULT 7"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `max_installments` INT DEFAULT 10"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `installment_value` DECIMAL(10,2) DEFAULT 0.00"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `carne_max_installments` INT DEFAULT 24"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `rating` DECIMAL(3,1) DEFAULT 4.9"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `reviews_count` INT DEFAULT 240"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `questions_count` INT DEFAULT 14"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `description` TEXT DEFAULT NULL"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `variation_name` VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `variation_options` TEXT DEFAULT NULL"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `variation_default` VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `products` ADD COLUMN `category` VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN sku VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN item_code VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN badge_1 VARCHAR(100) DEFAULT 'BRASIL'"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN badge_2 VARCHAR(100) DEFAULT 'LANÇAMENTO★'"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN discount_percentage INT DEFAULT 7"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN regular_price DECIMAL(10,2) DEFAULT 0.00"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN pix_price DECIMAL(10,2) DEFAULT 0.00"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN pix_discount_percentage INT DEFAULT 7"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN max_installments INT DEFAULT 10"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN installment_value DECIMAL(10,2) DEFAULT 0.00"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN carne_max_installments INT DEFAULT 24"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN rating DECIMAL(3,1) DEFAULT 4.9"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN reviews_count INT DEFAULT 240"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN questions_count INT DEFAULT 14"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN description TEXT DEFAULT NULL"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN variation_name VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN variation_options TEXT DEFAULT NULL"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN variation_default VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE products ADD COLUMN category VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
         
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS clients (
@@ -188,11 +222,11 @@ function ensureExtraTablesExist($pdo, $driver = 'mysql') {
                 city VARCHAR(100),
                 state VARCHAR(50),
                 password VARCHAR(255) DEFAULT NULL,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                created_at $dtType DEFAULT CURRENT_TIMESTAMP
             );
         ");
 
-        try { $pdo->exec("ALTER TABLE `clients` ADD COLUMN `password` VARCHAR(255) DEFAULT NULL"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE clients ADD COLUMN password VARCHAR(255) DEFAULT NULL"); } catch (Exception $e) {}
 
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS orders (
@@ -210,12 +244,16 @@ function ensureExtraTablesExist($pdo, $driver = 'mysql') {
                 payment_status VARCHAR(50) DEFAULT 'Aguardando Pagamento',
                 pix_code TEXT,
                 transaction_id VARCHAR(255) DEFAULT NULL,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                created_at $dtType DEFAULT CURRENT_TIMESTAMP
             );
         ");
 
-        try { $pdo->exec("ALTER TABLE `orders` AUTO_INCREMENT = 522837993"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `orders` ADD COLUMN `transaction_id` VARCHAR(255) DEFAULT NULL"); } catch (Exception $e) {}
+        if ($driver === 'mysql') {
+            try { $pdo->exec("ALTER TABLE orders AUTO_INCREMENT = 522837993"); } catch (Exception $e) {}
+        } elseif ($driver === 'pgsql') {
+            try { $pdo->exec("SELECT setval(pg_get_serial_sequence('orders', 'id'), 522837993, false)"); } catch (Exception $e) {}
+        }
+        try { $pdo->exec("ALTER TABLE orders ADD COLUMN transaction_id VARCHAR(255) DEFAULT NULL"); } catch (Exception $e) {}
 
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS gateway_settings (
@@ -285,7 +323,7 @@ function ensureExtraTablesExist($pdo, $driver = 'mysql') {
                 session_id VARCHAR(100),
                 page_name VARCHAR(100),
                 is_checkout INT DEFAULT 0,
-                last_active DATETIME DEFAULT CURRENT_TIMESTAMP
+                last_active $dtType DEFAULT CURRENT_TIMESTAMP
             );
         ");
 
@@ -338,18 +376,18 @@ function ensureExtraTablesExist($pdo, $driver = 'mysql') {
                 name VARCHAR(100) NOT NULL,
                 email VARCHAR(150) DEFAULT NULL,
                 password VARCHAR(255) NOT NULL,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                created_at $dtType DEFAULT CURRENT_TIMESTAMP
             );
         ");
 
-        try { $pdo->exec("ALTER TABLE `users` ADD COLUMN `username` VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `users` ADD COLUMN `email` VARCHAR(150) DEFAULT NULL"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE users ADD COLUMN username VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE users ADD COLUMN email VARCHAR(150) DEFAULT NULL"); } catch (Exception $e) {}
 
         try {
-            $userCheck = $pdo->query("SELECT COUNT(*) FROM `users`")->fetchColumn();
+            $userCheck = $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
             if ($userCheck == 0) {
                 $hash = password_hash('admin123', PASSWORD_DEFAULT);
-                $pdo->exec("INSERT INTO `users` (`username`, `name`, `email`, `password`) VALUES ('admin', 'Administrador', 'admin@casasbahia.com', '$hash')");
+                $pdo->exec("INSERT INTO users (username, name, email, password) VALUES ('admin', 'Administrador', 'admin@casasbahia.com', '$hash')");
             }
         } catch (Exception $e) {}
 
@@ -366,19 +404,19 @@ function ensureExtraTablesExist($pdo, $driver = 'mysql') {
                 review_text TEXT DEFAULT NULL,
                 photo_url TEXT DEFAULT NULL,
                 gender VARCHAR(20) DEFAULT 'ambos',
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                created_at $dtType DEFAULT CURRENT_TIMESTAMP
             );
         ");
 
-        try { $pdo->exec("ALTER TABLE `product_reviews` ADD COLUMN `author` VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `product_reviews` ADD COLUMN `reviewer_name` VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `product_reviews` ADD COLUMN `rating` INT DEFAULT 5"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `product_reviews` ADD COLUMN `rating_stars` INT DEFAULT 5"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `product_reviews` ADD COLUMN `review_date` VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `product_reviews` ADD COLUMN `content` TEXT DEFAULT NULL"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `product_reviews` ADD COLUMN `review_text` TEXT DEFAULT NULL"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `product_reviews` ADD COLUMN `photo_url` TEXT DEFAULT NULL"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `product_reviews` ADD COLUMN `gender` VARCHAR(20) DEFAULT 'ambos'"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE product_reviews ADD COLUMN author VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE product_reviews ADD COLUMN reviewer_name VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE product_reviews ADD COLUMN rating INT DEFAULT 5"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE product_reviews ADD COLUMN rating_stars INT DEFAULT 5"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE product_reviews ADD COLUMN review_date VARCHAR(100) DEFAULT NULL"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE product_reviews ADD COLUMN content TEXT DEFAULT NULL"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE product_reviews ADD COLUMN review_text TEXT DEFAULT NULL"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE product_reviews ADD COLUMN photo_url TEXT DEFAULT NULL"); } catch (Exception $e) {}
+        try { $pdo->exec("ALTER TABLE product_reviews ADD COLUMN gender VARCHAR(20) DEFAULT 'ambos'"); } catch (Exception $e) {}
 
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS review_images (
@@ -391,10 +429,10 @@ function ensureExtraTablesExist($pdo, $driver = 'mysql') {
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS home_banners (
                 id $pkType,
-                image_url LONGTEXT NOT NULL,
+                image_url $textType NOT NULL,
                 link_url VARCHAR(500) DEFAULT '#',
                 sort_order INT DEFAULT 1,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                created_at $dtType DEFAULT CURRENT_TIMESTAMP
             );
         ");
 
@@ -403,13 +441,15 @@ function ensureExtraTablesExist($pdo, $driver = 'mysql') {
                 id $pkType,
                 slug VARCHAR(50) UNIQUE,
                 title VARCHAR(100) NOT NULL,
-                image_url LONGTEXT NOT NULL,
+                image_url $textType NOT NULL,
                 sort_order INT DEFAULT 1
             );
         ");
 
-        try { $pdo->exec("ALTER TABLE `home_banners` MODIFY COLUMN `image_url` LONGTEXT"); } catch (Exception $e) {}
-        try { $pdo->exec("ALTER TABLE `home_categories` MODIFY COLUMN `image_url` LONGTEXT"); } catch (Exception $e) {}
+        if ($driver === 'mysql') {
+            try { $pdo->exec("ALTER TABLE home_banners MODIFY COLUMN image_url LONGTEXT"); } catch (Exception $e) {}
+            try { $pdo->exec("ALTER TABLE home_categories MODIFY COLUMN image_url LONGTEXT"); } catch (Exception $e) {}
+        }
 
         try {
             $catCount = $pdo->query("SELECT COUNT(*) FROM home_categories")->fetchColumn();
@@ -465,7 +505,7 @@ function ensureExtraTablesExist($pdo, $driver = 'mysql') {
                 token VARCHAR(100) NOT NULL,
                 clicks_count INT DEFAULT 0,
                 is_active INT DEFAULT 1,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                created_at $dtType DEFAULT CURRENT_TIMESTAMP
             );
         ");
 
@@ -484,7 +524,7 @@ function ensureExtraTablesExist($pdo, $driver = 'mysql') {
                 is_active INT DEFAULT 1,
                 send_image INT DEFAULT 1,
                 message_template TEXT DEFAULT NULL,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                updated_at $dtType DEFAULT CURRENT_TIMESTAMP
             );
         ");
 
@@ -518,7 +558,7 @@ function ensureExtraTablesExist($pdo, $driver = 'mysql') {
                 message_type VARCHAR(50) DEFAULT 'pix_created',
                 status VARCHAR(50) DEFAULT 'pending',
                 response_payload TEXT DEFAULT NULL,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                created_at $dtType DEFAULT CURRENT_TIMESTAMP
             );
         ");
 
